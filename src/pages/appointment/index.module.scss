@@ -33,6 +33,10 @@
   color: $color-text-secondary;
 }
 
+.toggleWrap {
+  margin-bottom: $spacing-lg;
+}
+
 .codeCard {
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
   border-radius: $radius-lg;
@@ -40,6 +44,21 @@
   text-align: center;
   margin-bottom: $spacing-lg;
   box-shadow: $shadow-card-hover;
+  transition: all $transition-base;
+}
+
+.codeCardUrgent {
+  background: linear-gradient(135deg, $color-risk-high 0%, darken($color-risk-high, 10%) 100%);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: $shadow-card-hover;
+  }
+  50% {
+    box-shadow: 0 4rpx 24rpx rgba($color-risk-high, 0.4);
+  }
 }
 
 .codeLabel {
@@ -64,6 +83,20 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+.countdownBadge {
+  margin-top: $spacing-md;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-button;
+  display: inline-block;
+}
+
+.countdownText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
 .tabRow {
   display: flex;
   background: $color-bg-card;
@@ -71,10 +104,12 @@
   padding: 4rpx;
   margin-bottom: $spacing-lg;
   box-shadow: $shadow-card;
+  overflow-x: auto;
 }
 
 .tabItem {
   flex: 1;
+  min-width: 120rpx;
   height: 72rpx;
   @include flex-center;
   border-radius: 48rpx - 4rpx;
@@ -90,7 +125,7 @@
 }
 
 .tabLabel {
-  font-size: $font-size-sm;
+  font-size: $font-size-xs + 2rpx;
   color: $color-text-secondary;
   white-space: nowrap;
 
@@ -139,28 +174,78 @@
   @include text-ellipsis;
 }
 
-.remindCard {
+.timelineCard {
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-lg;
   box-shadow: $shadow-card;
-  border-left: 6rpx solid $color-warning;
 }
 
-.remindTitle {
+.timelineDate {
   display: block;
   font-size: $font-size-lg;
   font-weight: $font-weight-semibold;
-  color: $color-text-primary;
+  color: $color-primary;
   margin-bottom: $spacing-md;
 }
 
-.remindText {
+.timelineItem {
+  display: flex;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.timelineLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: $spacing-md;
+}
+
+.timelineDot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+  flex-shrink: 0;
+  border: 4rpx solid rgba($color-primary, 0.2);
+}
+
+.timelineLine {
+  width: 4rpx;
+  flex: 1;
+  background: $color-divider;
+  margin-top: $spacing-xs;
+}
+
+.timelineContent {
+  flex: 1;
+  padding-bottom: $spacing-sm;
+}
+
+.timelineTime {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 4rpx;
+}
+
+.timelineTitle {
   display: block;
   font-size: $font-size-md;
-  color: $color-text-secondary;
-  line-height: $line-height-loose;
-  margin-bottom: $spacing-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.timelineDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
 }
 
 .checklistSection {
@@ -197,11 +282,26 @@
   transition: width $transition-base;
 }
 
-.checklistItems {
+.checklistCategory {
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-md;
   box-shadow: $shadow-card;
+}
+
+.checklistCategoryTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.checklistItems {
+  display: flex;
+  flex-direction: column;
 }
 
 .checkItem {
@@ -267,85 +367,159 @@
   font-weight: $font-weight-semibold;
 }
 
-.timelineSection {
+.metalSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.metalUrgentBanner {
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba($color-risk-high, 0.1) 0%, rgba($color-risk-high, 0.05) 100%);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-risk-high;
+}
+
+.metalUrgentText {
+  font-size: $font-size-md;
+  color: $color-risk-high;
+  font-weight: $font-weight-semibold;
+}
+
+.metalStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-lg;
   box-shadow: $shadow-card;
 }
 
-.timelineDate {
-  margin-bottom: $spacing-lg;
+.metalStatItem {
+  flex: 1;
+  text-align: center;
 }
 
-.timelineDateText {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
+.metalStatNum {
+  display: block;
+  font-size: $font-size-xl + 8rpx;
+  font-weight: $font-weight-bold;
   color: $color-primary;
 }
 
-.timelineItem {
-  display: flex;
-  margin-bottom: $spacing-lg;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.timelineLeft {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: $spacing-md;
-}
-
-.timelineDot {
-  width: 20rpx;
-  height: 20rpx;
-  border-radius: $radius-round;
-  background: $color-primary;
-  flex-shrink: 0;
-  border: 4rpx solid rgba($color-primary, 0.2);
-}
-
-.timelineDotDone {
-  background: $color-success;
-  border-color: rgba($color-success, 0.2);
-}
-
-.timelineLine {
-  width: 4rpx;
-  flex: 1;
-  background: $color-divider;
-  margin-top: $spacing-xs;
-}
-
-.timelineContent {
-  flex: 1;
-  padding-bottom: $spacing-sm;
-}
-
-.timelineTime {
-  display: block;
-  font-size: $font-size-sm;
-  color: $color-primary;
-  font-weight: $font-weight-semibold;
-  margin-bottom: 4rpx;
-}
-
-.timelineTitle {
-  display: block;
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: 4rpx;
-}
-
-.timelineDesc {
+.metalStatLabel {
   display: block;
   font-size: $font-size-sm;
   color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.metalStatDivider {
+  width: 1rpx;
+  height: 60rpx;
+  background: $color-divider;
+}
+
+.metalList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.metalItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.metalItemDone {
+  opacity: 0.6;
+  background: rgba($color-success, 0.03);
+  border: 2rpx solid rgba($color-success, 0.3);
+}
+
+.metalItemLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.metalItemIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.metalItemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.metalItemTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.metalItemDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.metalItemAction {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+}
+
+.metalItemActionTodo {
+  background: rgba($color-risk-medium, 0.1);
+}
+
+.metalItemActionDone {
+  background: rgba($color-success, 0.1);
+}
+
+.metalItemActionText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  .metalItemActionTodo & {
+    color: $color-risk-medium;
+  }
+
+  .metalItemActionDone & {
+    color: $color-success;
+  }
+}
+
+.metalTip {
+  padding: $spacing-md;
+  background: #E6F7FF;
+  border-radius: $radius-md;
+}
+
+.metalTipText {
+  font-size: $font-size-sm;
+  color: $color-info;
+  line-height: $line-height-normal;
 }
 
 .bottomAction {

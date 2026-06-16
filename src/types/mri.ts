@@ -32,14 +32,14 @@ export interface FamilyInfo {
   relationship: string;
 }
 
-export interface UploadItem {
+export interface UploadFile {
   id: string;
   type: 'film' | 'summary' | 'implant' | 'other';
-  title: string;
-  description: string;
-  imageUrl: string;
+  fileName: string;
+  filePath: string;
+  thumbPath?: string;
   uploadTime: string;
-  status: 'pending' | 'uploaded' | 'verified';
+  size: number;
 }
 
 export interface AppointmentInfo {
@@ -59,6 +59,7 @@ export interface ChecklistItem {
   id: string;
   text: string;
   checked: boolean;
+  category: 'document' | 'prepare' | 'metal' | 'diet';
 }
 
 export interface TimelineItem {
@@ -86,4 +87,12 @@ export interface EnhanceMRIInfo {
   dietRequirement: string;
   companionRequired: boolean;
   contrastType: string;
+}
+
+export interface MetalReminderItem {
+  id: string;
+  icon: string;
+  title: string;
+  desc: string;
+  handled: boolean;
 }

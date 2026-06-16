@@ -1,25 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { questions, patientTypes } from '@/data/questions';
-import { riskResultDescription } from '@/utils/riskAssess';
+import { riskResultDescription, speakText, stopSpeech, riskResultSpeakText } from '@/utils/riskAssess';
 import ElderToggle from '@/components/ElderToggle';
 import RiskBadge from '@/components/RiskBadge';
 import type { Answer, RiskResult } from '@/types/mri';
 import styles from './index.module.scss';
 
 const HomePage = () => {
-  const { answers, setAnswer, elderMode, getHighestRisk, setPatientType, voiceEnabled } = useAppStore();
+  const { answers, setAnswer, elderMode, getHighestRisk, setPatientType, voiceEnabled, patientType } = useAppStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [selectedPatientType, setSelectedPatientType] = useState('normal');
+  const [selectedPatientType, setSelectedPatientType] = useState(patientType || 'normal');
+  const hasInitialized = useRef(false);
 
   const currentQuestion = questions[currentStep];
   const currentAnswer = answers.find((a) => a.questionId === currentQuestion?.id);
   const isLastStep = currentStep === questions.length - 1;
   const riskResult: RiskResult = getHighestRisk();
+
+  useEffect(() => {
+    if (answers.length > 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
+      const lastAnsweredIdx = questions.findIndex((q) =>
+        answers.some((a) => a.questionId === q.id)
+      );
+      if (lastAnsweredIdx >= 0) {
+        const lastUnanswered = questions.findIndex((q, idx) => {
+          if (idx < lastAnsweredIdx) return false;
+          return !answers.some((a) => a.questionId === q.id);
+        });
+        if (lastUnanswered >= 0) {
+          setCurrentStep(lastUnanswered);
+        } else {
+          setCurrentStep(questions.length - 1);
+          setShowResult(true);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (voiceEnabled && currentQuestion && !showResult) {
+      const text = `第${currentStep + 1}题。${currentQuestion.title}。${currentQuestion.description}`;
+      speakText(text);
+    }
+    return () => {
+      if (!voiceEnabled) {
+        stopSpeech();
+      }
+    };
+  }, [currentStep, voiceEnabled, showResult]);
+
+  useEffect(() => {
+    if (voiceEnabled && showResult) {
+      speakText(riskResultSpeakText(riskResult));
+    }
+    return () => {
+      if (showResult && !voiceEnabled) {
+        stopSpeech();
+      }
+    };
+  }, [showResult, voiceEnabled, riskResult]);
 
   const handleSelectOption = (questionId: string, optionValue: string, riskLevel: 'high' | 'medium' | 'low') => {
     const answer: Answer = { questionId, selectedValue: optionValue, riskLevel };
@@ -43,8 +88,10 @@ const HomePage = () => {
   };
 
   const handleReset = () => {
+    stopSpeech();
     setCurrentStep(0);
     setShowResult(false);
+    setSelectedPatientType('normal');
     useAppStore.getState().resetAnswers();
   };
 
@@ -55,11 +102,12 @@ const HomePage = () => {
 
   const selectedType = patientTypes.find((p) => p.type === selectedPatientType);
 
-  useEffect(() => {
+  const handleReplay = () => {
     if (voiceEnabled && currentQuestion) {
-      console.info('[Home]', '语音播报:', currentQuestion.title);
+      const text = `第${currentStep + 1}题。${currentQuestion.title}。${currentQuestion.description}`;
+      speakText(text);
     }
-  }, [currentStep, voiceEnabled, currentQuestion]);
+  };
 
   return (
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
@@ -101,9 +149,14 @@ const HomePage = () => {
         <View className={styles.questionSection}>
           <View className={styles.progressRow}>
             <Text className={styles.progressText}>第 {currentStep + 1} 题 / 共 {questions.length} 题</Text>
-            <View className={styles.progressBar}>
-              <View className={styles.progressFill} style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }} />
-            </View>
+            {voiceEnabled && (
+              <View className={styles.replayBtn} onClick={handleReplay}>
+                <Text className={styles.replayBtnText}>🔊 重播</Text>
+              </View>
+            )}
+          </View>
+          <View className={styles.progressBar}>
+            <View className={styles.progressFill} style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }} />
           </View>
 
           {currentQuestion && (
@@ -161,6 +214,11 @@ const HomePage = () => {
             </Text>
             <RiskBadge result={riskResult} size="large" />
             <Text className={styles.resultDesc}>{riskResultDescription(riskResult)}</Text>
+            {voiceEnabled && (
+              <View className={styles.resultSpeakTip}>
+                <Text className={styles.resultSpeakTipText}>🔊 语音播报中...</Text>
+              </View>
+            )}
           </View>
 
           <View className={styles.answersSummary}>

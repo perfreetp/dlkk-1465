@@ -33,6 +33,10 @@
   color: $color-text-secondary;
 }
 
+.toggleWrap {
+  margin-bottom: $spacing-lg;
+}
+
 .checkInCard {
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
   border-radius: $radius-lg;
@@ -134,12 +138,24 @@
   margin-bottom: $spacing-md;
 }
 
+.remindSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
 .sectionTitle {
   display: block;
   font-size: $font-size-lg;
   font-weight: $font-weight-semibold;
   color: $color-text-primary;
-  margin-bottom: $spacing-xs;
+}
+
+.remindProgress {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
 }
 
 .sectionSubtitle {
@@ -158,11 +174,30 @@
 .remindItem {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: $spacing-md;
   background: $color-bg-card;
   border-radius: $radius-md;
   box-shadow: $shadow-card;
   border-left: 4rpx solid $color-warning;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.remindItemDone {
+  opacity: 0.6;
+  border-left-color: $color-success;
+  background: rgba($color-success, 0.03);
+}
+
+.remindItemLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .remindIcon {
@@ -173,6 +208,7 @@
 
 .remindInfo {
   flex: 1;
+  min-width: 0;
 }
 
 .remindTitle {
@@ -180,13 +216,43 @@
   font-size: $font-size-md;
   font-weight: $font-weight-medium;
   color: $color-text-primary;
-  margin-bottom: 4rpx;
+  @include text-ellipsis;
 }
 
 .remindDesc {
   display: block;
   font-size: $font-size-xs;
   color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.remindStatus {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+}
+
+.remindStatusTodo {
+  background: rgba($color-risk-medium, 0.1);
+}
+
+.remindStatusDone {
+  background: rgba($color-success, 0.1);
+}
+
+.remindStatusText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  .remindStatusTodo & {
+    color: $color-risk-medium;
+  }
+
+  .remindStatusDone & {
+    color: $color-success;
+  }
 }
 
 .processSection {

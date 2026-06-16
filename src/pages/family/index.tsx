@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { implantExamples } from '@/data/questions';
+import { speakText, stopSpeech } from '@/utils/riskAssess';
 import ElderToggle from '@/components/ElderToggle';
 import type { FamilyInfo } from '@/types/mri';
 import styles from './index.module.scss';
@@ -10,7 +11,7 @@ import styles from './index.module.scss';
 const relationships = ['配偶', '子女', '父母', '兄弟姐妹', '其他'];
 
 const FamilyPage = () => {
-  const { familyInfo, setFamilyInfo, elderMode } = useAppStore();
+  const { familyInfo, setFamilyInfo, elderMode, voiceEnabled } = useAppStore();
   const [activeTab, setActiveTab] = useState<'fill' | 'identify'>('fill');
 
   const handleFieldChange = (field: keyof FamilyInfo, value: string) => {
@@ -18,6 +19,24 @@ const FamilyPage = () => {
   };
 
   const isFormComplete = familyInfo.patientName && familyInfo.patientPhone && familyInfo.familyName && familyInfo.familyPhone && familyInfo.relationship;
+
+  const handleTabChange = (tab: 'fill' | 'identify') => {
+    setActiveTab(tab);
+    if (voiceEnabled) {
+      const text = tab === 'fill' ? '代填信息' : '辨认植入物';
+      speakText(text);
+    }
+  };
+
+  useEffect(() => {
+    if (voiceEnabled && activeTab === 'fill' && isFormComplete) {
+    }
+    return () => {
+      if (!voiceEnabled) {
+        stopSpeech();
+      }
+    };
+  }, [voiceEnabled, activeTab, isFormComplete]);
 
   return (
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
@@ -33,13 +52,13 @@ const FamilyPage = () => {
       <View className={styles.tabRow}>
         <View
           className={classnames(styles.tabItem, activeTab === 'fill' && styles.tabActive)}
-          onClick={() => setActiveTab('fill')}
+          onClick={() => handleTabChange('fill')}
         >
           <Text className={styles.tabLabel}>代填信息</Text>
         </View>
         <View
           className={classnames(styles.tabItem, activeTab === 'identify' && styles.tabActive)}
-          onClick={() => setActiveTab('identify')}
+          onClick={() => handleTabChange('identify')}
         >
           <Text className={styles.tabLabel}>辨认植入物</Text>
         </View>
@@ -112,6 +131,20 @@ const FamilyPage = () => {
           {isFormComplete && (
             <View className={styles.saveTip}>
               <Text className={styles.saveTipText}>✅ 信息已保存，双方联系方式将用于检查通知和紧急联系</Text>
+            </View>
+          )}
+
+          {familyInfo.patientName && (
+            <View className={styles.formSummary}>
+              <Text className={styles.formSummaryTitle}>📝 已填写信息</Text>
+              <View className={styles.formSummaryRow}>
+                <Text className={styles.formSummaryLabel}>患者</Text>
+                <Text className={styles.formSummaryValue}>{familyInfo.patientName || '未填写'}</Text>
+              </View>
+              <View className={styles.formSummaryRow}>
+                <Text className={styles.formSummaryLabel}>家属</Text>
+                <Text className={styles.formSummaryValue}>{familyInfo.familyName || '未填写'}{familyInfo.relationship ? `（${familyInfo.relationship}）` : ''}</Text>
+              </View>
             </View>
           )}
         </View>

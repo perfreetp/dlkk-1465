@@ -166,6 +166,40 @@
   line-height: $line-height-normal;
 }
 
+.formSummary {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  border-left: 6rpx solid $color-primary;
+}
+
+.formSummaryTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.formSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+}
+
+.formSummaryLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.formSummaryValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
 .identifySection {
   display: flex;
   flex-direction: column;

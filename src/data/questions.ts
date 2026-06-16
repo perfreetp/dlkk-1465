@@ -1,4 +1,4 @@
-import type { Question, PatientType, EnhanceMRIInfo, FeedbackItem } from '@/types/mri';
+import type { Question, PatientType, EnhanceMRIInfo, FeedbackItem, ChecklistItem, TimelineItem } from '@/types/mri';
 
 export const questions: Question[] = [
   {
@@ -187,6 +187,25 @@ export const implantExamples = [
   },
 ];
 
+export const checklistData: ChecklistItem[] = [
+  { id: 'c1', text: '携带身份证和医保卡', checked: false, category: 'document' },
+  { id: 'c2', text: '携带既往片子（如有）', checked: false, category: 'document' },
+  { id: 'c3', text: '携带植入物证明（如有）', checked: false, category: 'document' },
+  { id: 'c4', text: '增强检查需4小时禁食', checked: false, category: 'diet' },
+  { id: 'c5', text: '检查当天不化妆、不涂指甲油', checked: false, category: 'prepare' },
+  { id: 'c6', text: '提前取下所有金属饰品', checked: false, category: 'metal' },
+  { id: 'c7', text: '穿着无金属扣的宽松衣物', checked: false, category: 'prepare' },
+];
+
+export const timelineData: TimelineItem[] = [
+  { time: '09:00', title: '到达医院', description: '建议提前30分钟到达', completed: false },
+  { time: '09:10', title: '窗口签到', description: '出示核验码完成签到', completed: false },
+  { time: '09:15', title: '更衣准备', description: '取下饰品、更换检查服', completed: false },
+  { time: '09:30', title: 'MRI检查', description: '检查时间约30-45分钟', completed: false },
+  { time: '10:15', title: '检查结束', description: '到休息区观察15分钟', completed: false },
+  { time: '10:30', title: '离院', description: '增强检查后需多饮水', completed: false },
+];
+
 export const appointmentData = {
   id: 'MRI20260617001',
   patientName: '张三',
@@ -196,21 +215,4 @@ export const appointmentData = {
   department: '影像科',
   location: '3号楼1层 MRI室2号机房',
   checkInCode: 'MRI-8C3K9',
-  checklist: [
-    { id: 'c1', text: '携带身份证和医保卡', checked: false },
-    { id: 'c2', text: '携带既往片子（如有）', checked: false },
-    { id: 'c3', text: '携带植入物证明（如有）', checked: false },
-    { id: 'c4', text: '增强检查需4小时禁食', checked: false },
-    { id: 'c5', text: '检查当天不化妆、不涂指甲油', checked: false },
-    { id: 'c6', text: '提前取下所有金属饰品', checked: false },
-    { id: 'c7', text: '穿着无金属扣的宽松衣物', checked: false },
-  ],
-  timeline: [
-    { time: '09:00', title: '到达医院', description: '建议提前30分钟到达', completed: false },
-    { time: '09:10', title: '窗口签到', description: '出示核验码完成签到', completed: false },
-    { time: '09:15', title: '更衣准备', description: '取下饰品、更换检查服', completed: false },
-    { time: '09:30', title: 'MRI检查', description: '检查时间约30-45分钟', completed: false },
-    { time: '10:15', title: '检查结束', description: '到休息区观察15分钟', completed: false },
-    { time: '10:30', title: '离院', description: '增强检查后需多饮水', completed: false },
-  ],
 };

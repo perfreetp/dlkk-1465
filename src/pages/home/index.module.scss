@@ -111,14 +111,28 @@
 }
 
 .progressRow {
-  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
 }
 
 .progressText {
   display: block;
   font-size: $font-size-sm;
   color: $color-text-tertiary;
-  margin-bottom: $spacing-xs;
+}
+
+.replayBtn {
+  padding: $spacing-xs $spacing-sm;
+  background: rgba($color-primary, 0.1);
+  border-radius: $radius-button;
+}
+
+.replayBtnText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  white-space: nowrap;
 }
 
 .progressBar {
@@ -217,11 +231,11 @@
     border-color: $color-primary;
   }
 
-  .optionHigh& {
+  .optionHigh & {
     border-color: $color-risk-high;
   }
 
-  .optionMedium& {
+  .optionMedium & {
     border-color: $color-risk-medium;
   }
 }
@@ -348,6 +362,19 @@
   line-height: $line-height-loose;
   margin-top: $spacing-md;
   text-align: left;
+}
+
+.resultSpeakTip {
+  margin-top: $spacing-md;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-button;
+  display: inline-block;
+}
+
+.resultSpeakTipText {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .answersSummary {

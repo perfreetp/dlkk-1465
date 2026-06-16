@@ -1,27 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
-import { appointmentData, feedbackQuestions } from '@/data/questions';
+import { appointmentData, timelineData, feedbackQuestions } from '@/data/questions';
+import { speakText, stopSpeech } from '@/utils/riskAssess';
+import ElderToggle from '@/components/ElderToggle';
 import styles from './index.module.scss';
 
-const metalReminders = [
-  { icon: '💍', title: '戒指、项链、手镯', desc: '所有金属饰品必须取下' },
-  { icon: '🔔', title: '耳环、鼻环、舌钉', desc: '包括非金属的装饰也建议取下' },
-  { icon: '🦷', title: '可拆卸义齿', desc: '检查前务必取下' },
-  { icon: '📌', title: '发夹、别针', desc: '包括金属材质的发饰' },
-  { icon: '👗', title: '内衣钢圈', desc: '检查时需更换检查服' },
-  { icon: '📱', title: '手机、钥匙、硬币', desc: '不能带入检查室' },
-  { icon: '💊', title: '药物贴片', desc: '部分药物贴片含金属，需告知医生' },
-  { icon: '👁️', title: '化妆、指甲油', desc: '部分化妆品含金属微粒' },
-];
-
 const GuidePage = () => {
-  const { elderMode } = useAppStore();
+  const { elderMode, voiceEnabled, metalReminders, toggleMetalReminder, getMetalHandledCount } = useAppStore();
   const [showCode, setShowCode] = useState(false);
   const [feedbackRatings, setFeedbackRatings] = useState<Record<string, number>>({});
   const [feedbackChoices, setFeedbackChoices] = useState<Record<string, string>>({});
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  const metalTotal = metalReminders.length;
+  const metalHandled = getMetalHandledCount();
+
+  useEffect(() => {
+    return () => {
+      if (!voiceEnabled) {
+        stopSpeech();
+      }
+    };
+  }, [voiceEnabled]);
+
+  const handleToggleMetal = (id: string) => {
+    toggleMetalReminder(id);
+    if (voiceEnabled) {
+      const item = metalReminders.find((m) => m.id === id);
+      if (item) {
+        speakText(`${item.title}，已${!item.handled ? '处理' : '取消处理'}`);
+      }
+    }
+  };
 
   const handleRating = (questionId: string, rating: number) => {
     setFeedbackRatings((prev) => ({ ...prev, [questionId]: rating }));
@@ -33,14 +45,23 @@ const GuidePage = () => {
 
   const handleSubmitFeedback = () => {
     setFeedbackSubmitted(true);
+    if (voiceEnabled) {
+      speakText('感谢您的反馈');
+    }
     console.info('[Guide]', '反馈提交:', { ratings: feedbackRatings, choices: feedbackChoices });
   };
+
+  const canSubmitFeedback = Object.keys(feedbackRatings).length > 0 || Object.keys(feedbackChoices).length > 0;
 
   return (
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
       <View className={styles.header}>
         <Text className={styles.headerTitle}>到院指引</Text>
         <Text className={styles.headerSubtitle}>检查当天要做什么，一目了然</Text>
+      </View>
+
+      <View className={styles.toggleWrap}>
+        <ElderToggle />
       </View>
 
       <View className={styles.checkInCard} onClick={() => setShowCode(!showCode)}>
@@ -65,15 +86,36 @@ const GuidePage = () => {
       </View>
 
       <View className={styles.remindSection}>
-        <Text className={styles.sectionTitle}>⚠️ 检查前必须去除的物品</Text>
-        <Text className={styles.sectionSubtitle}>以下物品严禁带入MRI检查室，请提前处理</Text>
+        <View className={styles.remindSectionHeader}>
+          <Text className={styles.sectionTitle}>⚠️ 检查前必须去除的物品</Text>
+          <Text className={styles.remindProgress}>{metalHandled}/{metalTotal}</Text>
+        </View>
+        <Text className={styles.sectionSubtitle}>
+          {metalHandled === metalTotal ? '✅ 全部已处理，您已做好准备！' : `还有 ${metalTotal - metalHandled} 项未处理，请确认`}
+        </Text>
         <View className={styles.remindGrid}>
-          {metalReminders.map((item, idx) => (
-            <View key={idx} className={styles.remindItem}>
-              <Text className={styles.remindIcon}>{item.icon}</Text>
-              <View className={styles.remindInfo}>
-                <Text className={styles.remindTitle}>{item.title}</Text>
-                <Text className={styles.remindDesc}>{item.desc}</Text>
+          {metalReminders.map((item) => (
+            <View
+              key={item.id}
+              className={classnames(styles.remindItem, item.handled && styles.remindItemDone)}
+              onClick={() => handleToggleMetal(item.id)}
+            >
+              <View className={styles.remindItemLeft}>
+                <Text className={styles.remindIcon}>{item.icon}</Text>
+                <View className={styles.remindInfo}>
+                  <Text className={styles.remindTitle}>{item.title}</Text>
+                  <Text className={styles.remindDesc}>{item.desc}</Text>
+                </View>
+              </View>
+              <View
+                className={classnames(
+                  styles.remindStatus,
+                  item.handled ? styles.remindStatusDone : styles.remindStatusTodo,
+                )}
+              >
+                <Text className={styles.remindStatusText}>
+                  {item.handled ? '✓ 已处理' : '未处理'}
+                </Text>
               </View>
             </View>
           ))}
@@ -83,7 +125,7 @@ const GuidePage = () => {
       <View className={styles.processSection}>
         <Text className={styles.sectionTitle}>📋 到院流程</Text>
         <View className={styles.processList}>
-          {appointmentData.timeline.map((item, idx) => (
+          {timelineData.map((item, idx) => (
             <View key={idx} className={styles.processItem}>
               <View className={styles.processStep}>
                 <Text className={styles.processStepNum}>{idx + 1}</Text>
@@ -143,9 +185,9 @@ const GuidePage = () => {
               </View>
             ))}
             <View
-              className={classnames(styles.btnPrimary, (!Object.keys(feedbackRatings).length && !Object.keys(feedbackChoices).length) && styles.btnDisabled)}
+              className={classnames(styles.btnPrimary, !canSubmitFeedback && styles.btnDisabled)}
               onClick={() => {
-                if (Object.keys(feedbackRatings).length > 0 || Object.keys(feedbackChoices).length > 0) {
+                if (canSubmitFeedback) {
                   handleSubmitFeedback();
                 }
               }}

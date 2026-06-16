@@ -2,10 +2,19 @@ import React from 'react';
 import { View, Text } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
+import { stopSpeech } from '@/utils/riskAssess';
 import styles from './index.module.scss';
 
 const ElderToggle: React.FC = () => {
   const { elderMode, setElderMode, voiceEnabled, setVoiceEnabled } = useAppStore();
+
+  const handleVoiceToggle = () => {
+    const newValue = !voiceEnabled;
+    setVoiceEnabled(newValue);
+    if (!newValue) {
+      stopSpeech();
+    }
+  };
 
   return (
     <View className={styles.elderToggle}>
@@ -21,7 +30,7 @@ const ElderToggle: React.FC = () => {
       </View>
       <View
         className={classnames(styles.toggleItem, voiceEnabled && styles.toggleActive)}
-        onClick={() => setVoiceEnabled(!voiceEnabled)}
+        onClick={handleVoiceToggle}
       >
         <Text className={styles.toggleIcon}>🔊</Text>
         <Text className={styles.toggleLabel}>语音播报</Text>
