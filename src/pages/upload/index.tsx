@@ -21,14 +21,28 @@ const uploadCategories = [
   { type: 'other' as const, title: '其他资料', icon: '📎', desc: '检查单、转诊单等', accept: 'all' },
 ];
 
+const nurseCategories = [
+  { type: 'film' as const, title: '既往片子', icon: '🎞️', required: true },
+  { type: 'summary' as const, title: '出院小结', icon: '📋', required: true },
+  { type: 'implant' as const, title: '植入物证明', icon: '📄', required: true },
+];
+
 const UploadPage = () => {
   const { elderMode, getHighestRisk, voiceEnabled, uploadFiles, addUploadFile, removeUploadFile, getFilesByType } = useAppStore();
   const [showEnhanceInfo, setShowEnhanceInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [saving, setSaving] = useState(false);
+  const [showNurseOverview, setShowNurseOverview] = useState(true);
 
   const riskResult = getHighestRisk();
   const speechOk = canUseSpeech();
+
+  const getLastUploadTime = (type: string): string => {
+    const files = getFilesByType(type);
+    if (files.length === 0) return '未上传';
+    const last = files[files.length - 1];
+    return last.uploadTime || '未知时间';
+  };
 
   useEffect(() => {
     return () => {
@@ -176,11 +190,29 @@ const UploadPage = () => {
 
     if (isPdfFile(file.fileName) || isDocFile(file.fileName)) {
       const ext = file.fileName.toLowerCase().split('.').pop() || '';
-      openDocumentFile(accessiblePath, ext);
+      openDocumentFile(accessiblePath, ext, file.fileName);
       return;
     }
 
-    Taro.showToast({ title: '暂不支持预览此类型', icon: 'none' });
+    Taro.showModal({
+      title: '文件预览',
+      content: '此类型暂不支持直接预览。\n\n📌 资料已安全保存，到院后可向护士出示。',
+      confirmText: '好的',
+      showCancel: false,
+    });
+  };
+
+  const handleNurseCategoryClick = (type: string) => {
+    setActiveTab(type);
+    if (voiceEnabled && speechOk) {
+      const cat = nurseCategories.find((c) => c.type === type);
+      const count = getFilesByType(type).length;
+      if (count === 0) {
+        speakText(`${cat?.title}，暂未上传`);
+      } else {
+        speakText(`${cat?.title}，已上传${count}份，最后上传时间${getLastUploadTime(type)}`);
+      }
+    }
   };
 
   const displayFiles = activeTab === 'all'
@@ -210,6 +242,91 @@ const UploadPage = () => {
           </Text>
         </View>
       )}
+
+      <View
+        className={styles.nurseOverviewCard}
+        onClick={() => setShowNurseOverview(!showNurseOverview)}
+      >
+        <View className={styles.nurseOverviewHeader}>
+          <Text className={styles.nurseOverviewIcon}>👩‍⚕️</Text>
+          <View className={styles.nurseOverviewTitleWrap}>
+            <Text className={styles.nurseOverviewTitle}>护士材料总览</Text>
+            <Text className={styles.nurseOverviewSubtitle}>按分类汇总，缺料一目了然</Text>
+          </View>
+          <Text className={classnames(styles.nurseOverviewArrow, showNurseOverview && styles.nurseOverviewArrowOpen)}>▼</Text>
+        </View>
+
+        {showNurseOverview && (
+          <View className={styles.nurseOverviewBody}>
+            {nurseCategories.map((cat) => {
+              const count = getFilesByType(cat.type).length;
+              const lastTime = getLastUploadTime(cat.type);
+              const missing = count === 0;
+              return (
+                <View
+                  key={cat.type}
+                  className={classnames(
+                    styles.nurseCategoryItem,
+                    missing && styles.nurseCategoryMissing,
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNurseCategoryClick(cat.type);
+                  }}
+                >
+                  <View className={styles.nurseCategoryLeft}>
+                    <Text className={styles.nurseCategoryIcon}>{cat.icon}</Text>
+                    <View className={styles.nurseCategoryInfo}>
+                      <View className={styles.nurseCategoryTitleRow}>
+                        <Text className={styles.nurseCategoryTitle}>{cat.title}</Text>
+                        {cat.required && missing && (
+                          <Text className={styles.nurseCategoryBadgeMissing}>缺</Text>
+                        )}
+                        {cat.required && !missing && (
+                          <Text className={styles.nurseCategoryBadgeOk}>齐</Text>
+                        )}
+                      </View>
+                      <Text className={styles.nurseCategoryMeta}>
+                        {count === 0 ? '未上传' : `共 ${count} 份`}
+                      </Text>
+                      {count > 0 && (
+                        <Text className={styles.nurseCategoryTime}>最后上传：{lastTime}</Text>
+                      )}
+                    </View>
+                  </View>
+                  <View className={styles.nurseCategoryAction}>
+                    <Text className={styles.nurseCategoryActionText}>
+                      {count === 0 ? '去上传' : '查看文件'}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+
+            <View className={styles.nurseOverviewSummary}>
+              <View className={styles.nurseSummaryRow}>
+                <Text className={styles.nurseSummaryLabel}>必备材料</Text>
+                <Text
+                  className={classnames(
+                    styles.nurseSummaryValue,
+                    nurseCategories.every((c) => getFilesByType(c.type).length > 0)
+                      ? styles.nurseSummaryOk
+                      : styles.nurseSummaryWarn,
+                  )}
+                >
+                  {nurseCategories.filter((c) => getFilesByType(c.type).length === 0).length === 0
+                    ? '✅ 全部齐全'
+                    : `⚠️ 缺 ${nurseCategories.filter((c) => getFilesByType(c.type).length === 0).length} 项`}
+                </Text>
+              </View>
+              <View className={styles.nurseSummaryRow}>
+                <Text className={styles.nurseSummaryLabel}>资料总数</Text>
+                <Text className={styles.nurseSummaryValue}>{totalFiles} 份</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </View>
 
       {totalFiles > 0 && (
         <View className={styles.statsCard}>

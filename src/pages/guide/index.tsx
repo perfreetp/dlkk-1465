@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { appointmentData, timelineData, feedbackQuestions, checklistData } from '@/data/questions';
 import { speakText, stopSpeech, canUseSpeech } from '@/utils/riskAssess';
+import { getCountdownInfo, getCountdownLevelClass } from '@/utils/countdown';
 import ElderToggle from '@/components/ElderToggle';
 import styles from './index.module.scss';
 
@@ -28,8 +30,15 @@ const GuidePage = () => {
   const [feedbackRatings, setFeedbackRatings] = useState<Record<string, number>>({});
   const [feedbackChoices, setFeedbackChoices] = useState<Record<string, string>>({});
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [tick, setTick] = useState(0);
+  const [reminderShown, setReminderShown] = useState(false);
 
   const speechOk = canUseSpeech();
+
+  const countdownInfo = useMemo(() => {
+    setTick;
+    return getCountdownInfo(appointmentData.examDate, appointmentData.examTime);
+  }, [tick, appointmentData.examDate, appointmentData.examTime]);
 
   const todoList = useMemo<TodoItem[]>(() => {
     const items: TodoItem[] = [];
@@ -109,23 +118,41 @@ const GuidePage = () => {
   const metalHandled = getMetalHandledCount();
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (voiceEnabled && speechOk && !reminderShown) {
+      const shouldSpeak = countdownInfo.level === 'oneDay' || countdownInfo.level === 'twoHour' || countdownInfo.level === 'arrived';
+      if (shouldSpeak) {
+        setReminderShown(true);
+        speakText(countdownInfo.speakText);
+      } else if (pendingItems.length > 0) {
+        const urgentCount = urgentItems.length;
+        if (urgentCount > 0) {
+          speakText(`到院提醒：您还有${urgentCount}项紧急事项需要处理，请确认。`);
+        } else {
+          speakText(`到院提醒：您还有${pendingItems.length}项待办事项。`);
+        }
+      }
+    }
     return () => {
       if (!voiceEnabled) {
         stopSpeech();
       }
     };
-  }, [voiceEnabled]);
+  }, [voiceEnabled, speechOk, countdownInfo, reminderShown, pendingItems.length, urgentItems.length]);
 
-  useEffect(() => {
-    if (voiceEnabled && speechOk && pendingItems.length > 0) {
-      const urgentCount = urgentItems.length;
-      if (urgentCount > 0) {
-        speakText(`到院提醒：您还有${urgentCount}项紧急事项需要处理，请确认。`);
-      } else {
-        speakText(`到院提醒：您还有${pendingItems.length}项待办事项。`);
-      }
+  const handleReplayCountdown = () => {
+    if (voiceEnabled && speechOk) {
+      speakText(countdownInfo.speakText);
+    } else if (!speechOk) {
+      Taro.showToast({ title: '当前环境不支持语音', icon: 'none' });
     }
-  }, []);
+  };
 
   const handleTodoClick = (item: TodoItem) => {
     if (item.category === 'metal') {
@@ -194,6 +221,32 @@ const GuidePage = () => {
 
       <View className={styles.toggleWrap}>
         <ElderToggle />
+      </View>
+
+      <View
+        className={classnames(
+          styles.countdownCard,
+          styles[getCountdownLevelClass(countdownInfo.level)],
+        )}
+        onClick={handleReplayCountdown}
+      >
+        <View className={styles.countdownLeft}>
+          <Text className={styles.countdownIcon}>
+            {countdownInfo.level === 'twoHour' ? '🚨' : countdownInfo.level === 'oneDay' ? '⏰' : countdownInfo.level === 'arrived' ? '🏥' : countdownInfo.level === 'passed' ? '📌' : '✅'}
+          </Text>
+          <View className={styles.countdownTextWrap}>
+            <Text className={styles.countdownLabel}>{countdownInfo.label}</Text>
+            <Text className={styles.countdownValue}>{countdownInfo.countdownText}</Text>
+            {countdownInfo.urgentText && (
+              <Text className={styles.countdownUrgent}>{countdownInfo.urgentText}</Text>
+            )}
+          </View>
+        </View>
+        {voiceEnabled && speechOk && (
+          <View className={styles.countdownSpeak}>
+            <Text className={styles.countdownSpeakText}>🔊 重播</Text>
+          </View>
+        )}
       </View>
 
       <View className={styles.checkInCard} onClick={() => setShowCode(!showCode)}>

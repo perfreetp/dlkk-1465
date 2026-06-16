@@ -36,11 +36,24 @@
   margin-right: $spacing-xs;
 }
 
+.toggleLabelWrap {
+  flex: 1;
+  margin-right: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .toggleLabel {
   font-size: $font-size-sm;
   color: $color-text-secondary;
-  margin-right: auto;
   white-space: nowrap;
+}
+
+.toggleSubLabel {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  margin-top: 2rpx;
 }
 
 .toggleSwitch {

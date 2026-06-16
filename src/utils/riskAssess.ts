@@ -109,10 +109,32 @@ export const getSpeechNotAvailableReason = (): string => {
   try {
     const env = Taro.getEnv();
     if (env === Taro.ENV_TYPE.WEAPP) {
-      return '当前小程序未配置语音播报插件，请阅读文字内容';
+      let reason = '微信小程序语音暂不可用';
+      try {
+        const hasPlugin = typeof (globalThis as any).requirePlugin === 'function';
+        if (!hasPlugin) {
+          reason = '微信基础库版本过低，请升级微信后重试';
+        } else {
+          const plugin = (globalThis as any).requirePlugin?.('WechatSI');
+          if (!plugin) {
+            reason = '小程序需在微信公众平台-设置-第三方设置-添加「同声传译」插件（wx069ba97219f66d99）后方可使用语音';
+          } else if (typeof plugin.textToSpeech !== 'function') {
+            reason = '同声传译插件版本过低，请在 app.config.ts 中升级到 0.3.5 或以上';
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+      return reason;
     }
     if (env === Taro.ENV_TYPE.WEB) {
-      return '当前浏览器不支持语音播报，请升级浏览器或阅读文字内容';
+      if (typeof window !== 'undefined' && !window.speechSynthesis) {
+        return '当前浏览器不支持语音播报（缺少 SpeechSynthesis API）。请使用 Chrome、Edge、Safari 等现代浏览器打开';
+      }
+      if (typeof window !== 'undefined' && location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        return '语音播报需要 HTTPS 环境。请在本地 localhost 或 HTTPS 网站中使用';
+      }
+      return '当前浏览器语音播报不可用，请检查系统音量或尝试换用 Chrome 浏览器';
     }
   } catch (e) {
     // ignore

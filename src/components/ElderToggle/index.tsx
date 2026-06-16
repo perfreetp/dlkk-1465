@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { stopSpeech, canUseSpeech, getSpeechNotAvailableReason } from '@/utils/riskAssess';
@@ -18,8 +19,21 @@ const ElderToggle: React.FC = () => {
     }
   }, []);
 
+  const showSpeechHelp = () => {
+    const reason = speechReason || getSpeechNotAvailableReason() || '请阅读文字内容';
+    Taro.showModal({
+      title: '🔊 语音播报说明',
+      content: reason + '\n\n如急需使用语音播报，建议切换为 Chrome、Edge 或 Safari 浏览器，或升级微信到最新版本。',
+      showCancel: false,
+      confirmText: '我知道了',
+    });
+  };
+
   const handleVoiceToggle = () => {
-    if (!speechAvailable) return;
+    if (!speechAvailable) {
+      showSpeechHelp();
+      return;
+    }
     const newValue = !voiceEnabled;
     setVoiceEnabled(newValue);
     if (!newValue) {
@@ -49,7 +63,12 @@ const ElderToggle: React.FC = () => {
           onClick={handleVoiceToggle}
         >
           <Text className={styles.toggleIcon}>🔊</Text>
-          <Text className={styles.toggleLabel}>语音播报</Text>
+          <View className={styles.toggleLabelWrap}>
+            <Text className={styles.toggleLabel}>语音播报</Text>
+            {!speechAvailable && (
+              <Text className={styles.toggleSubLabel}>点击查看原因 →</Text>
+            )}
+          </View>
           <View
             className={classnames(
               styles.toggleSwitch,
@@ -61,8 +80,12 @@ const ElderToggle: React.FC = () => {
           </View>
         </View>
         {!speechAvailable && speechReason && (
-          <View className={styles.voiceUnavailable}>
-            <Text className={styles.voiceUnavailableText}>⚠️ {speechReason}</Text>
+          <View className={styles.voiceUnavailable} onClick={showSpeechHelp}>
+            <Text className={styles.voiceUnavailableText}>
+              {speechReason.length > 40
+                ? '⚠️ 语音不可用，点击查看原因 →'
+                : `⚠️ ${speechReason}`}
+            </Text>
           </View>
         )}
       </View>

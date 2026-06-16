@@ -12,6 +12,12 @@ export default defineAppConfig({
     navigationBarTitleText: 'MRI预约核验',
     navigationBarTextStyle: 'white'
   },
+  plugins: {
+    WechatSI: {
+      version: '0.3.5',
+      provider: 'wx069ba97219f66d99',
+    },
+  },
   tabBar: {
     color: '#8AA0A0',
     selectedColor: '#2B8C8C',

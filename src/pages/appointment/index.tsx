@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { appointmentData, checklistData, timelineData } from '@/data/questions';
-import { speakText, stopSpeech } from '@/utils/riskAssess';
+import { speakText, stopSpeech, canUseSpeech } from '@/utils/riskAssess';
+import { getCountdownInfo, getCountdownLevelClass } from '@/utils/countdown';
 import ElderToggle from '@/components/ElderToggle';
 import type { ChecklistItem } from '@/types/mri';
 import styles from './index.module.scss';
@@ -19,7 +20,15 @@ const categoryLabels: Record<string, string> = {
 const AppointmentPage = () => {
   const { elderMode, voiceEnabled, metalReminders, toggleMetalReminder, getMetalHandledCount, toggleChecklistItem, isChecklistChecked, checklistChecked } = useAppStore();
   const [activeSection, setActiveSection] = useState<'detail' | 'checklist' | 'metal'>('detail');
-  const [countdown, setCountdown] = useState('');
+  const [tick, setTick] = useState(0);
+  const [reminderShown, setReminderShown] = useState(false);
+
+  const speechOk = canUseSpeech();
+
+  const countdownInfo = useMemo(() => {
+    setTick;
+    return getCountdownInfo(appointmentData.examDate, appointmentData.examTime);
+  }, [tick, appointmentData.examDate, appointmentData.examTime]);
 
   const checklistWithStatus: ChecklistItem[] = checklistData.map((item) => ({
     ...item,
@@ -33,42 +42,47 @@ const AppointmentPage = () => {
   const metalHandled = getMetalHandledCount();
 
   useEffect(() => {
-    const targetDate = new Date(`${appointmentData.examDate}T${appointmentData.examTime}:00`).getTime();
-    const now = Date.now();
-    const diff = targetDate - now;
-
-    if (diff > 0) {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      setCountdown(`还有 ${days}天${hours}小时`);
-    } else {
-      setCountdown('已到检查时间');
-    }
-
     const timer = setInterval(() => {
-      const now2 = Date.now();
-      const diff2 = targetDate - now2;
-      if (diff2 > 0) {
-        const days = Math.floor(diff2 / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff2 % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        setCountdown(`还有 ${days}天${hours}小时`);
-      }
-    }, 60000);
-
+      setTick((t) => t + 1);
+    }, 60 * 1000);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    if (voiceEnabled && activeSection === 'metal') {
-      const text = `金属物品提醒。已处理${metalHandled}项，共${metalTotal}项。请提前取下所有金属物品。`;
-      speakText(text);
+    if (voiceEnabled && speechOk && !reminderShown) {
+      const shouldSpeak = countdownInfo.level === 'oneDay' || countdownInfo.level === 'twoHour' || countdownInfo.level === 'arrived';
+      if (shouldSpeak) {
+        setReminderShown(true);
+        speakText(countdownInfo.speakText);
+      }
     }
     return () => {
       if (!voiceEnabled) {
         stopSpeech();
       }
     };
-  }, [voiceEnabled, activeSection, metalHandled, metalTotal]);
+  }, [voiceEnabled, speechOk, countdownInfo, reminderShown]);
+
+  const handleSectionChange = (section: 'detail' | 'checklist' | 'metal') => {
+    setActiveSection(section);
+    if (voiceEnabled && speechOk) {
+      if (section === 'detail') {
+        speakText(`预约详情。${countdownInfo.countdownText}。检查时间${appointmentData.examDate}${appointmentData.examTime}。地点：${appointmentData.location}`);
+      } else if (section === 'checklist') {
+        speakText(`检查清单。已确认${checkedCount}项，共${checklistWithStatus.length}项。请逐项核对。`);
+      } else if (section === 'metal') {
+        speakText(`金属物品提醒。已处理${metalHandled}项，共${metalTotal}项。请提前取下所有金属物品。`);
+      }
+    }
+  };
+
+  const handleReplayCountdown = () => {
+    if (voiceEnabled && speechOk) {
+      speakText(countdownInfo.speakText);
+    } else if (!speechOk) {
+      Taro.showToast({ title: '当前环境不支持语音', icon: 'none' });
+    }
+  };
 
   const handleToggleCheck = (id: string) => {
     toggleChecklistItem(id);
@@ -77,14 +91,6 @@ const AppointmentPage = () => {
   const handleToggleMetal = (id: string) => {
     toggleMetalReminder(id);
   };
-
-  const isUrgent = () => {
-    const targetDate = new Date(`${appointmentData.examDate}T${appointmentData.examTime}:00`).getTime();
-    const diff = targetDate - Date.now();
-    return diff < 1000 * 60 * 60 * 24;
-  };
-
-  const urgent = isUrgent();
 
   return (
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
@@ -97,33 +103,54 @@ const AppointmentPage = () => {
         <ElderToggle />
       </View>
 
-      <View className={classnames(styles.codeCard, urgent && styles.codeCardUrgent)}>
+      <View
+        className={classnames(
+          styles.countdownCard,
+          styles[getCountdownLevelClass(countdownInfo.level)],
+        )}
+        onClick={handleReplayCountdown}
+      >
+        <View className={styles.countdownLeft}>
+          <Text className={styles.countdownIcon}>
+            {countdownInfo.level === 'twoHour' ? '🚨' : countdownInfo.level === 'oneDay' ? '⏰' : countdownInfo.level === 'arrived' ? '🏥' : countdownInfo.level === 'passed' ? '📌' : '✅'}
+          </Text>
+          <View className={styles.countdownTextWrap}>
+            <Text className={styles.countdownLabel}>{countdownInfo.label}</Text>
+            <Text className={styles.countdownValue}>{countdownInfo.countdownText}</Text>
+            {countdownInfo.urgentText && (
+              <Text className={styles.countdownUrgent}>{countdownInfo.urgentText}</Text>
+            )}
+          </View>
+        </View>
+        {voiceEnabled && speechOk && (
+          <View className={styles.countdownSpeak}>
+            <Text className={styles.countdownSpeakText}>🔊 重播</Text>
+          </View>
+        )}
+      </View>
+
+      <View className={classnames(styles.codeCard, countdownInfo.level === 'twoHour' && styles.codeCardUrgent)}>
         <Text className={styles.codeLabel}>核验码</Text>
         <Text className={styles.codeValue}>{appointmentData.checkInCode}</Text>
         <Text className={styles.codeTip}>到院后出示此码完成签到</Text>
-        {urgent && (
-          <View className={styles.countdownBadge}>
-            <Text className={styles.countdownText}>⏰ 检查临近：{countdown}</Text>
-          </View>
-        )}
       </View>
 
       <View className={styles.tabRow}>
         <View
           className={classnames(styles.tabItem, activeSection === 'detail' && styles.tabActive)}
-          onClick={() => setActiveSection('detail')}
+          onClick={() => handleSectionChange('detail')}
         >
           <Text className={styles.tabLabel}>预约详情</Text>
         </View>
         <View
           className={classnames(styles.tabItem, activeSection === 'checklist' && styles.tabActive)}
-          onClick={() => setActiveSection('checklist')}
+          onClick={() => handleSectionChange('checklist')}
         >
           <Text className={styles.tabLabel}>检查清单 {checkedCount > 0 && `(${checkedCount})`}</Text>
         </View>
         <View
           className={classnames(styles.tabItem, activeSection === 'metal' && styles.tabActive)}
-          onClick={() => setActiveSection('metal')}
+          onClick={() => handleSectionChange('metal')}
         >
           <Text className={styles.tabLabel}>金属提醒 {metalHandled > 0 && `(${metalHandled}/${metalTotal})`}</Text>
         </View>
@@ -159,7 +186,7 @@ const AppointmentPage = () => {
           </View>
 
           <View className={styles.timelineCard}>
-            <Text className={styles.timelineDate}>� 到院流程</Text>
+            <Text className={styles.timelineDate}>📅 到院流程</Text>
             {timelineData.map((item, idx) => (
               <View key={idx} className={styles.timelineItem}>
                 <View className={styles.timelineLeft}>
@@ -225,7 +252,7 @@ const AppointmentPage = () => {
 
       {activeSection === 'metal' && (
         <View className={styles.metalSection}>
-          {urgent && (
+          {(countdownInfo.level === 'twoHour' || countdownInfo.level === 'arrived') && (
             <View className={styles.metalUrgentBanner}>
               <Text className={styles.metalUrgentText}>
                 ⚠️ 检查临近！请务必确认以下金属物品已取下

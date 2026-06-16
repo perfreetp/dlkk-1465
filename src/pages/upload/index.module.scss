@@ -37,6 +37,215 @@
   margin-bottom: $spacing-lg;
 }
 
+.nurseOverviewCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  overflow: hidden;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.95;
+  }
+}
+
+.nurseOverviewHeader {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  background: linear-gradient(135deg, rgba($color-primary, 0.1) 0%, $color-bg-card 100%);
+  border-left: 6rpx solid $color-primary;
+}
+
+.nurseOverviewIcon {
+  font-size: 44rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.nurseOverviewTitleWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.nurseOverviewTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 2rpx;
+}
+
+.nurseOverviewSubtitle {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.nurseOverviewArrow {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+  transition: transform $transition-base;
+}
+
+.nurseOverviewArrowOpen {
+  transform: rotate(180deg);
+}
+
+.nurseOverviewBody {
+  padding: $spacing-md $spacing-md $spacing-lg;
+}
+
+.nurseCategoryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  border-left: 4rpx solid $color-success;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.nurseCategoryMissing {
+  border-left-color: $color-risk-high;
+  background: rgba($color-risk-high, 0.03);
+}
+
+.nurseCategoryLeft {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.nurseCategoryIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.nurseCategoryInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.nurseCategoryTitleRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.nurseCategoryTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-right: $spacing-xs;
+}
+
+.nurseCategoryBadgeMissing {
+  font-size: $font-size-xs;
+  padding: 2rpx 12rpx;
+  background: rgba($color-risk-high, 0.12);
+  color: $color-risk-high;
+  border-radius: $radius-round;
+  font-weight: $font-weight-semibold;
+}
+
+.nurseCategoryBadgeOk {
+  font-size: $font-size-xs;
+  padding: 2rpx 12rpx;
+  background: rgba($color-success, 0.12);
+  color: $color-success;
+  border-radius: $radius-round;
+  font-weight: $font-weight-semibold;
+}
+
+.nurseCategoryMeta {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: 2rpx;
+}
+
+.nurseCategoryMissing .nurseCategoryMeta {
+  color: $color-risk-high;
+  font-weight: $font-weight-medium;
+}
+
+.nurseCategoryTime {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.nurseCategoryAction {
+  padding: $spacing-xs $spacing-md;
+  background: rgba($color-primary, 0.1);
+  border-radius: $radius-button;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+}
+
+.nurseCategoryMissing .nurseCategoryAction {
+  background: rgba($color-risk-high, 0.1);
+}
+
+.nurseCategoryActionText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  white-space: nowrap;
+}
+
+.nurseCategoryMissing .nurseCategoryActionText {
+  color: $color-risk-high;
+}
+
+.nurseOverviewSummary {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba($color-primary, 0.08) 0%, rgba($color-primary-light, 0.05) 100%);
+  border-radius: $radius-md;
+}
+
+.nurseSummaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.nurseSummaryLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.nurseSummaryValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.nurseSummaryOk {
+  color: $color-success;
+}
+
+.nurseSummaryWarn {
+  color: $color-risk-high;
+}
+
 .riskWarning {
   display: flex;
   align-items: center;

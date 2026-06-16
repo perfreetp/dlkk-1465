@@ -37,6 +37,189 @@
   margin-bottom: $spacing-lg;
 }
 
+.countdownCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.99);
+  }
+}
+
+.countdownLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.countdownIcon {
+  font-size: 48rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.countdownTextWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.countdownLabel {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 4rpx;
+}
+
+.countdownValue {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  margin-bottom: 4rpx;
+}
+
+.countdownUrgent {
+  display: block;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+  margin-top: 4rpx;
+}
+
+.countdownSpeak {
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-button;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.countdownSpeakText {
+  font-size: $font-size-sm;
+  white-space: nowrap;
+}
+
+.levelFar {
+  background: $color-bg-card;
+  border-left: 6rpx solid $color-success;
+
+  .countdownLabel {
+    color: $color-text-secondary;
+  }
+  .countdownValue {
+    color: $color-text-primary;
+  }
+  .countdownUrgent {
+    color: $color-text-tertiary;
+  }
+  .countdownSpeakText {
+    color: $color-primary;
+  }
+}
+
+.levelOneDay {
+  background: linear-gradient(135deg, rgba($color-warning, 0.1) 0%, $color-bg-card 100%);
+  border-left: 6rpx solid $color-warning;
+
+  .countdownLabel {
+    color: $color-warning;
+  }
+  .countdownValue {
+    color: $color-text-primary;
+  }
+  .countdownUrgent {
+    color: $color-warning;
+  }
+  .countdownSpeak {
+    background: rgba($color-warning, 0.1);
+  }
+  .countdownSpeakText {
+    color: $color-warning;
+  }
+}
+
+.levelTwoHour {
+  background: linear-gradient(135deg, rgba($color-risk-high, 0.12) 0%, $color-bg-card 100%);
+  border-left: 6rpx solid $color-risk-high;
+  animation: countdownPulse 2s ease-in-out infinite;
+
+  .countdownLabel {
+    color: $color-risk-high;
+  }
+  .countdownValue {
+    color: $color-risk-high;
+  }
+  .countdownUrgent {
+    color: $color-risk-high;
+    font-weight: $font-weight-semibold;
+  }
+  .countdownSpeak {
+    background: rgba($color-risk-high, 0.1);
+  }
+  .countdownSpeakText {
+    color: $color-risk-high;
+  }
+}
+
+@keyframes countdownPulse {
+  0%, 100% {
+    box-shadow: $shadow-card;
+  }
+  50% {
+    box-shadow: 0 4rpx 24rpx rgba($color-risk-high, 0.25);
+  }
+}
+
+.levelArrived {
+  background: linear-gradient(135deg, rgba($color-primary, 0.1) 0%, $color-bg-card 100%);
+  border-left: 6rpx solid $color-primary;
+
+  .countdownLabel {
+    color: $color-primary;
+  }
+  .countdownValue {
+    color: $color-primary;
+  }
+  .countdownUrgent {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+  .countdownSpeak {
+    background: rgba($color-primary, 0.1);
+  }
+  .countdownSpeakText {
+    color: $color-primary;
+  }
+}
+
+.levelPassed {
+  background: rgba($color-text-tertiary, 0.05);
+  border-left: 6rpx solid $color-text-tertiary;
+  opacity: 0.85;
+
+  .countdownLabel {
+    color: $color-text-secondary;
+  }
+  .countdownValue {
+    color: $color-text-secondary;
+  }
+  .countdownUrgent {
+    color: $color-text-tertiary;
+  }
+  .countdownSpeak {
+    background: rgba($color-text-tertiary, 0.1);
+  }
+  .countdownSpeakText {
+    color: $color-text-secondary;
+  }
+}
+
 .codeCard {
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
   border-radius: $radius-lg;
