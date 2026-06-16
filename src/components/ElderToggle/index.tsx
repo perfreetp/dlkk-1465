@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
-import { stopSpeech } from '@/utils/riskAssess';
+import { stopSpeech, canUseSpeech } from '@/utils/riskAssess';
 import styles from './index.module.scss';
 
 const ElderToggle: React.FC = () => {
   const { elderMode, setElderMode, voiceEnabled, setVoiceEnabled } = useAppStore();
+  const [speechAvailable, setSpeechAvailable] = useState(true);
+
+  useEffect(() => {
+    setSpeechAvailable(canUseSpeech());
+  }, []);
 
   const handleVoiceToggle = () => {
     const newValue = !voiceEnabled;
@@ -28,15 +33,30 @@ const ElderToggle: React.FC = () => {
           <View className={styles.toggleDot} />
         </View>
       </View>
-      <View
-        className={classnames(styles.toggleItem, voiceEnabled && styles.toggleActive)}
-        onClick={handleVoiceToggle}
-      >
-        <Text className={styles.toggleIcon}>🔊</Text>
-        <Text className={styles.toggleLabel}>语音播报</Text>
-        <View className={classnames(styles.toggleSwitch, voiceEnabled && styles.switchOn)}>
-          <View className={styles.toggleDot} />
+      <View className={styles.voiceWrap}>
+        <View
+          className={classnames(
+            styles.toggleItem,
+            voiceEnabled && styles.toggleActive,
+            !speechAvailable && styles.toggleDisabled,
+          )}
+          onClick={() => {
+            if (speechAvailable) {
+              handleVoiceToggle();
+            }
+          }}
+        >
+          <Text className={styles.toggleIcon}>🔊</Text>
+          <Text className={styles.toggleLabel}>语音播报</Text>
+          <View className={classnames(styles.toggleSwitch, voiceEnabled && speechAvailable && styles.switchOn, !speechAvailable && styles.switchDisabled)}>
+            <View className={styles.toggleDot} />
+          </View>
         </View>
+        {!speechAvailable && (
+          <View className={styles.voiceUnavailable}>
+            <Text className={styles.voiceUnavailableText}>⚠️ 当前环境不支持语音播报，请阅读文字内容</Text>
+          </View>
+        )}
       </View>
     </View>
   );

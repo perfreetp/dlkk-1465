@@ -33,6 +33,10 @@
   color: $color-text-secondary;
 }
 
+.toggleWrap {
+  margin-bottom: $spacing-lg;
+}
+
 .riskWarning {
   display: flex;
   align-items: center;
@@ -60,18 +64,30 @@
   border-radius: $radius-md;
   padding: $spacing-md;
   margin-bottom: $spacing-md;
-  text-align: center;
 }
 
-.statsText {
-  font-size: $font-size-md;
-  color: $color-text-secondary;
+.statsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.statsItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .statsNum {
   font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   color: $color-primary;
+}
+
+.statsLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 2rpx;
 }
 
 .enhanceCard {
@@ -223,6 +239,72 @@
   white-space: nowrap;
 }
 
+.fileListSection {
+  margin-bottom: $spacing-lg;
+}
+
+.fileListHeader {
+  margin-bottom: $spacing-md;
+}
+
+.filterRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filterItem {
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.filterActive {
+  background: rgba($color-primary, 0.1);
+  border-color: $color-primary;
+}
+
+.filterLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+
+  .filterActive & {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.emptyState {
+  padding: $spacing-xxl;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 64rpx;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyText {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
 .fileList {
   display: flex;
   flex-direction: column;
@@ -254,8 +336,18 @@
   height: 100%;
 }
 
-.fileIcon {
-  font-size: 32rpx;
+.fileTypeBadge {
+  @include flex-center;
+  width: 100%;
+  height: 100%;
+  background: rgba($color-primary, 0.08);
+  border-radius: $radius-sm;
+}
+
+.fileTypeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
 }
 
 .fileInfo {

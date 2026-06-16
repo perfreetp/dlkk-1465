@@ -2,17 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
-import { implantExamples } from '@/data/questions';
-import { speakText, stopSpeech } from '@/utils/riskAssess';
+import { implantExamples, checklistData } from '@/data/questions';
+import { riskResultLabel, riskResultIcon, riskResultDescription, speakText, stopSpeech, canUseSpeech } from '@/utils/riskAssess';
 import ElderToggle from '@/components/ElderToggle';
 import type { FamilyInfo } from '@/types/mri';
 import styles from './index.module.scss';
 
 const relationships = ['配偶', '子女', '父母', '兄弟姐妹', '其他'];
 
+const requiredUploadTypes = [
+  { type: 'film', label: '既往片子' },
+  { type: 'summary', label: '出院小结' },
+  { type: 'implant', label: '植入物证明' },
+];
+
 const FamilyPage = () => {
-  const { familyInfo, setFamilyInfo, elderMode, voiceEnabled } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'fill' | 'identify'>('fill');
+  const {
+    familyInfo, setFamilyInfo, elderMode, voiceEnabled,
+    answers, getHighestRisk, uploadFiles, getFilesByType,
+    metalReminders, getMetalHandledCount, checklistChecked,
+  } = useAppStore();
+  const [activeTab, setActiveTab] = useState<'fill' | 'identify' | 'summary'>('fill');
 
   const handleFieldChange = (field: keyof FamilyInfo, value: string) => {
     setFamilyInfo({ ...familyInfo, [field]: value });
@@ -20,23 +30,31 @@ const FamilyPage = () => {
 
   const isFormComplete = familyInfo.patientName && familyInfo.patientPhone && familyInfo.familyName && familyInfo.familyPhone && familyInfo.relationship;
 
-  const handleTabChange = (tab: 'fill' | 'identify') => {
+  const handleTabChange = (tab: 'fill' | 'identify' | 'summary') => {
     setActiveTab(tab);
-    if (voiceEnabled) {
-      const text = tab === 'fill' ? '代填信息' : '辨认植入物';
-      speakText(text);
+    if (voiceEnabled && canUseSpeech()) {
+      const tabNames = { fill: '代填信息', identify: '辨认植入物', summary: '核验摘要' };
+      speakText(tabNames[tab]);
     }
   };
 
   useEffect(() => {
-    if (voiceEnabled && activeTab === 'fill' && isFormComplete) {
-    }
     return () => {
       if (!voiceEnabled) {
         stopSpeech();
       }
     };
-  }, [voiceEnabled, activeTab, isFormComplete]);
+  }, [voiceEnabled]);
+
+  const riskResult = getHighestRisk();
+
+  const missingUploads = requiredUploadTypes.filter((req) => getFilesByType(req.type).length === 0);
+
+  const unhandledMetals = metalReminders.filter((m) => !m.handled);
+  const metalHandled = getMetalHandledCount();
+  const metalTotal = metalReminders.length;
+
+  const uncheckedItems = checklistData.filter((c) => !checklistChecked.includes(c.id));
 
   return (
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
@@ -61,6 +79,12 @@ const FamilyPage = () => {
           onClick={() => handleTabChange('identify')}
         >
           <Text className={styles.tabLabel}>辨认植入物</Text>
+        </View>
+        <View
+          className={classnames(styles.tabItem, activeTab === 'summary' && styles.tabActive)}
+          onClick={() => handleTabChange('summary')}
+        >
+          <Text className={styles.tabLabel}>核验摘要</Text>
         </View>
       </View>
 
@@ -133,20 +157,6 @@ const FamilyPage = () => {
               <Text className={styles.saveTipText}>✅ 信息已保存，双方联系方式将用于检查通知和紧急联系</Text>
             </View>
           )}
-
-          {familyInfo.patientName && (
-            <View className={styles.formSummary}>
-              <Text className={styles.formSummaryTitle}>📝 已填写信息</Text>
-              <View className={styles.formSummaryRow}>
-                <Text className={styles.formSummaryLabel}>患者</Text>
-                <Text className={styles.formSummaryValue}>{familyInfo.patientName || '未填写'}</Text>
-              </View>
-              <View className={styles.formSummaryRow}>
-                <Text className={styles.formSummaryLabel}>家属</Text>
-                <Text className={styles.formSummaryValue}>{familyInfo.familyName || '未填写'}{familyInfo.relationship ? `（${familyInfo.relationship}）` : ''}</Text>
-              </View>
-            </View>
-          )}
         </View>
       )}
 
@@ -183,6 +193,128 @@ const FamilyPage = () => {
 
           <View className={styles.identifyNote}>
             <Text className={styles.identifyNoteText}>📌 如果辨认出自己体内有以上植入物，请返回自测页面如实选择，或携带植入物证明到院</Text>
+          </View>
+        </View>
+      )}
+
+      {activeTab === 'summary' && (
+        <View className={styles.summarySection}>
+          <View className={styles.summaryHeader}>
+            <Text className={styles.summaryHeaderIcon}>📋</Text>
+            <View className={styles.summaryHeaderText}>
+              <Text className={styles.summaryHeaderTitle}>共享核验摘要</Text>
+              <Text className={styles.summaryHeaderDesc}>可截图或现场出示给护士</Text>
+            </View>
+          </View>
+
+          <View className={styles.summaryCard}>
+            <Text className={styles.summaryCardTitle}>� 患者信息</Text>
+            {familyInfo.patientName ? (
+              <View className={styles.summaryContent}>
+                <View className={styles.summaryRow}>
+                  <Text className={styles.summaryRowLabel}>患者</Text>
+                  <Text className={styles.summaryRowValue}>{familyInfo.patientName}  {familyInfo.patientPhone}</Text>
+                </View>
+                <View className={styles.summaryRow}>
+                  <Text className={styles.summaryRowLabel}>家属</Text>
+                  <Text className={styles.summaryRowValue}>{familyInfo.familyName}（{familyInfo.relationship}）{familyInfo.familyPhone}</Text>
+                </View>
+              </View>
+            ) : (
+              <View className={styles.summaryEmpty}>
+                <Text className={styles.summaryEmptyText}>未填写，请先到"代填信息"补充</Text>
+              </View>
+            )}
+          </View>
+
+          <View className={styles.summaryCard}>
+            <Text className={styles.summaryCardTitle}>🔬 自测结论</Text>
+            {answers.length > 0 ? (
+              <View className={styles.summaryContent}>
+                <View className={classnames(
+                  styles.riskBadge,
+                  riskResult === 'cannot' && styles.riskHigh,
+                  riskResult === 'askDoctor' && styles.riskMedium,
+                  riskResult === 'canContinue' && styles.riskLow,
+                )}>
+                  <Text className={styles.riskBadgeIcon}>{riskResultIcon(riskResult)}</Text>
+                  <Text className={styles.riskBadgeLabel}>{riskResultLabel(riskResult)}</Text>
+                </View>
+                <Text className={styles.riskDesc}>{riskResultDescription(riskResult)}</Text>
+              </View>
+            ) : (
+              <View className={styles.summaryEmpty}>
+                <Text className={styles.summaryEmptyText}>未完成自测，请先到"自测首页"完成问卷</Text>
+              </View>
+            )}
+          </View>
+
+          <View className={styles.summaryCard}>
+            <Text className={styles.summaryCardTitle}>📁 资料补传情况</Text>
+            <View className={styles.summaryContent}>
+              {requiredUploadTypes.map((req) => {
+                const count = getFilesByType(req.type).length;
+                return (
+                  <View key={req.type} className={styles.summaryRow}>
+                    <Text className={styles.summaryRowLabel}>{req.label}</Text>
+                    <Text className={classnames(styles.summaryRowValue, count === 0 && styles.textWarning)}>
+                      {count > 0 ? `已上传 ${count} 份` : '❌ 未上传'}
+                    </Text>
+                  </View>
+                );
+              })}
+              {missingUploads.length > 0 && (
+                <View className={styles.summaryTip}>
+                  <Text className={styles.summaryTipText}>⚠️ 缺少：{missingUploads.map((m) => m.label).join('、')}</Text>
+                </View>
+              )}
+              {missingUploads.length === 0 && (
+                <View className={styles.summaryTip}>
+                  <Text className={styles.summaryTipOk}>✅ 主要资料已补齐</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className={styles.summaryCard}>
+            <Text className={styles.summaryCardTitle}>🔔 检查前待处理项</Text>
+            <View className={styles.summaryContent}>
+              <View className={styles.summaryRow}>
+                <Text className={styles.summaryRowLabel}>金属物品</Text>
+                <Text className={classnames(styles.summaryRowValue, unhandledMetals.length > 0 && styles.textWarning)}>
+                  {metalHandled}/{metalTotal} 已处理 {unhandledMetals.length > 0 ? `（${unhandledMetals.length}项未处理）` : ''}
+                </Text>
+              </View>
+              {unhandledMetals.length > 0 && (
+                <View className={styles.summarySubList}>
+                  {unhandledMetals.map((m) => (
+                    <Text key={m.id} className={styles.summarySubItem}>· {m.icon} {m.title}</Text>
+                  ))}
+                </View>
+              )}
+              <View className={styles.summaryRow}>
+                <Text className={styles.summaryRowLabel}>检查清单</Text>
+                <Text className={classnames(styles.summaryRowValue, uncheckedItems.length > 0 && styles.textWarning)}>
+                  {checklistChecked.length}/{checklistData.length} 已确认 {uncheckedItems.length > 0 ? `（${uncheckedItems.length}项未确认）` : ''}
+                </Text>
+              </View>
+              {uncheckedItems.length > 0 && (
+                <View className={styles.summarySubList}>
+                  {uncheckedItems.map((c) => (
+                    <Text key={c.id} className={styles.summarySubItem}>· {c.text}</Text>
+                  ))}
+                </View>
+              )}
+              {unhandledMetals.length === 0 && uncheckedItems.length === 0 && (
+                <View className={styles.summaryTip}>
+                  <Text className={styles.summaryTipOk}>✅ 所有检查前事项已处理完毕</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className={styles.summaryNote}>
+            <Text className={styles.summaryNoteText}>📌 本摘要由小程序自动汇总，可截图出示给护士或医生查看。如信息有变化，请重新进入此页刷新。</Text>
           </View>
         </View>
       )}

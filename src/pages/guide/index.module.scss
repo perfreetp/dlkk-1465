@@ -134,11 +134,55 @@
   color: $color-text-tertiary;
 }
 
-.remindSection {
+.urgentBanner {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background: rgba($color-risk-high, 0.1);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-risk-high;
+  margin-bottom: $spacing-md;
+  animation: urgentPulse 2s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% {
+    background: rgba($color-risk-high, 0.1);
+  }
+  50% {
+    background: rgba($color-risk-high, 0.18);
+  }
+}
+
+.urgentBannerIcon {
+  font-size: 40rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.urgentBannerText {
+  flex: 1;
+}
+
+.urgentBannerTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-risk-high;
+}
+
+.urgentBannerDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-risk-high;
+  margin-top: 2rpx;
+}
+
+.todoSection {
   margin-bottom: $spacing-md;
 }
 
-.remindSectionHeader {
+.todoHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -152,10 +196,16 @@
   color: $color-text-primary;
 }
 
-.remindProgress {
+.todoProgress {
   font-size: $font-size-md;
   font-weight: $font-weight-bold;
   color: $color-primary;
+}
+
+.todoAllDone {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-success;
 }
 
 .sectionSubtitle {
@@ -163,6 +213,168 @@
   font-size: $font-size-sm;
   color: $color-text-tertiary;
   margin-bottom: $spacing-md;
+}
+
+.allDoneCard {
+  padding: $spacing-xxl;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.allDoneIcon {
+  font-size: 64rpx;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.allDoneText {
+  display: block;
+  font-size: $font-size-lg;
+  color: $color-success;
+  font-weight: $font-weight-semibold;
+}
+
+.todoList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  border-left: 4rpx solid $color-border;
+  transition: all $transition-base;
+}
+
+.todoItemDone {
+  opacity: 0.5;
+  border-left-color: $color-success;
+}
+
+.todoItemUrgent {
+  border-left-color: $color-risk-high;
+  background: rgba($color-risk-high, 0.02);
+}
+
+.todoItemLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.todoIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.todoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.todoTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.todoDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.todoAction {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.todoActionPending {
+  background: rgba($color-primary, 0.1);
+}
+
+.todoActionDone {
+  background: rgba($color-success, 0.1);
+}
+
+.todoActionText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  .todoActionPending & {
+    color: $color-primary;
+  }
+
+  .todoActionDone & {
+    color: $color-success;
+  }
+}
+
+.todoStatus {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  margin-left: $spacing-md;
+  flex-shrink: 0;
+}
+
+.todoStatusUrgent {
+  background: rgba($color-risk-high, 0.1);
+}
+
+.todoStatusPending {
+  background: rgba($color-warning, 0.1);
+}
+
+.todoStatusText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  .todoStatusUrgent & {
+    color: $color-risk-high;
+  }
+
+  .todoStatusPending & {
+    color: $color-warning;
+  }
+}
+
+.remindSection {
+  margin-bottom: $spacing-md;
+}
+
+.remindSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.remindProgress {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
 }
 
 .remindGrid {

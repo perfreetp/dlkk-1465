@@ -4,24 +4,45 @@ import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { enhanceMRIInfo } from '@/data/questions';
-import { speakText, stopSpeech } from '@/utils/riskAssess';
+import { speakText, stopSpeech, canUseSpeech } from '@/utils/riskAssess';
 import ElderToggle from '@/components/ElderToggle';
 import type { UploadFile } from '@/types/mri';
 import styles from './index.module.scss';
 
 const uploadCategories = [
-  { type: 'film' as const, title: '既往片子', icon: '🎞️', desc: 'CT、X光、MRI等影像资料' },
-  { type: 'summary' as const, title: '出院小结', icon: '📋', desc: '住院治疗的出院记录' },
-  { type: 'implant' as const, title: '植入物证明', icon: '📄', desc: '植入物的型号和材质证明' },
-  { type: 'other' as const, title: '其他资料', icon: '📎', desc: '检查单、转诊单等' },
+  { type: 'film' as const, title: '既往片子', icon: '🎞️', desc: 'CT、X光、MRI等影像资料', accept: 'image' },
+  { type: 'summary' as const, title: '出院小结', icon: '📋', desc: '住院治疗的出院记录', accept: 'all' },
+  { type: 'implant' as const, title: '植入物证明', icon: '📄', desc: '植入物的型号和材质证明', accept: 'all' },
+  { type: 'other' as const, title: '其他资料', icon: '📎', desc: '检查单、转诊单等', accept: 'all' },
 ];
+
+const isImageFile = (fileName: string): boolean => {
+  const ext = fileName.toLowerCase().split('.').pop() || '';
+  return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
+};
+
+const formatFileSize = (size: number): string => {
+  if (size < 1024) return `${size}B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)}MB`;
+};
+
+const getFileTypeLabel = (fileName: string): string => {
+  const ext = fileName.toLowerCase().split('.').pop() || '';
+  const map: Record<string, string> = {
+    pdf: 'PDF', doc: 'Word', docx: 'Word', xls: 'Excel', xlsx: 'Excel',
+    jpg: '图片', jpeg: '图片', png: '图片', gif: '图片', bmp: '图片', webp: '图片',
+  };
+  return map[ext] || ext.toUpperCase();
+};
 
 const UploadPage = () => {
   const { elderMode, getHighestRisk, voiceEnabled, uploadFiles, addUploadFile, removeUploadFile, getFilesByType } = useAppStore();
   const [showEnhanceInfo, setShowEnhanceInfo] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('all');
 
   const riskResult = getHighestRisk();
+  const speechOk = canUseSpeech();
 
   useEffect(() => {
     return () => {
@@ -44,27 +65,65 @@ const UploadPage = () => {
         res.tempFilePaths.forEach((path, index) => {
           const now = Date.now();
           const file: UploadFile = {
-            id: `file_${now}_${index}`,
+            id: `img_${now}_${index}`,
             type: type as UploadFile['type'],
             fileName: `${category?.title || '资料'}_${index + 1}.jpg`,
             filePath: path,
             thumbPath: path,
-            uploadTime: new Date(now).toLocaleString(),
+            uploadTime: new Date(now).toLocaleString('zh-CN'),
             size: res.tempFiles?.[index]?.size || 0,
           };
           addUploadFile(file);
         });
-        if (voiceEnabled) {
+        if (voiceEnabled && speechOk) {
           speakText(`已上传${res.tempFilePaths.length}张图片`);
         }
-        console.info('[Upload]', `成功选择 ${res.tempFilePaths.length} 张图片`);
+        Taro.showToast({ title: `已上传${res.tempFilePaths.length}张`, icon: 'success' });
       }
     } catch (e) {
       console.error('[Upload]', '选择图片失败:', e);
-      Taro.showToast({
-        title: '选择图片失败',
-        icon: 'none',
+    }
+  };
+
+  const handleChooseFile = async (type: string) => {
+    try {
+      const res = await Taro.chooseMessageFile({
+        count: 5,
+        type: 'all',
       });
+
+      if (res.tempFiles && res.tempFiles.length > 0) {
+        const category = uploadCategories.find((c) => c.type === type);
+        res.tempFiles.forEach((file, index) => {
+          const now = Date.now();
+          const uploadFile: UploadFile = {
+            id: `doc_${now}_${index}`,
+            type: type as UploadFile['type'],
+            fileName: file.name || `${category?.title || '资料'}_${index + 1}`,
+            filePath: file.path,
+            thumbPath: isImageFile(file.name || '') ? file.path : undefined,
+            uploadTime: new Date(now).toLocaleString('zh-CN'),
+            size: file.size || 0,
+          };
+          addUploadFile(uploadFile);
+        });
+        if (voiceEnabled && speechOk) {
+          speakText(`已上传${res.tempFiles.length}个文件`);
+        }
+        Taro.showToast({ title: `已上传${res.tempFiles.length}个文件`, icon: 'success' });
+      }
+    } catch (e) {
+      console.error('[Upload]', '选择文件失败:', e);
+      handleChooseImage(type);
+    }
+  };
+
+  const handleUpload = (type: string) => {
+    const category = uploadCategories.find((c) => c.type === type);
+    if (category?.accept === 'image') {
+      handleChooseImage(type);
+    } else {
+      handleChooseFile(type);
     }
   };
 
@@ -72,7 +131,7 @@ const UploadPage = () => {
     e.stopPropagation();
     Taro.showModal({
       title: '确认删除',
-      content: '确定要删除这张资料吗？',
+      content: '确定要删除这份资料吗？',
       success: (res) => {
         if (res.confirm) {
           removeUploadFile(id);
@@ -81,7 +140,20 @@ const UploadPage = () => {
     });
   };
 
-  const getCategoryCount = (type: string) => getFilesByType(type).length;
+  const handlePreviewImage = (filePath: string, e) => {
+    e.stopPropagation();
+    const allImageUrls = displayFiles
+      .filter((f) => f.thumbPath)
+      .map((f) => f.thumbPath || f.filePath);
+    Taro.previewImage({
+      current: filePath,
+      urls: allImageUrls,
+    });
+  };
+
+  const displayFiles = activeTab === 'all'
+    ? uploadFiles
+    : uploadFiles.filter((f) => f.type === activeTab);
 
   const totalFiles = uploadFiles.length;
 
@@ -89,7 +161,7 @@ const UploadPage = () => {
     <ScrollView scrollY className={classnames(styles.container, elderMode && styles.elderMode)}>
       <View className={styles.header}>
         <Text className={styles.headerTitle}>资料上传</Text>
-        <Text className={styles.headerSubtitle}>上传既往资料，方便医生快速了解您的情况</Text>
+        <Text className={styles.headerSubtitle}>补传检查资料，医生到院前就能提前了解</Text>
       </View>
 
       <View className={styles.toggleWrap}>
@@ -109,7 +181,22 @@ const UploadPage = () => {
 
       {totalFiles > 0 && (
         <View className={styles.statsCard}>
-          <Text className={styles.statsText}>📁 已上传 <Text className={styles.statsNum}>{totalFiles}</Text> 份资料</Text>
+          <View className={styles.statsRow}>
+            <View className={styles.statsItem}>
+              <Text className={styles.statsNum}>{totalFiles}</Text>
+              <Text className={styles.statsLabel}>已上传</Text>
+            </View>
+            {uploadCategories.map((cat) => {
+              const count = getFilesByType(cat.type).length;
+              if (count === 0) return null;
+              return (
+                <View key={cat.type} className={styles.statsItem}>
+                  <Text className={styles.statsNum}>{count}</Text>
+                  <Text className={styles.statsLabel}>{cat.title}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
       )}
 
@@ -142,12 +229,12 @@ const UploadPage = () => {
       </View>
 
       <View className={styles.uploadSection}>
-        <Text className={styles.sectionTitle}>上传资料</Text>
+        <Text className={styles.sectionTitle}>📋 预审材料箱</Text>
         <View className={styles.uploadGrid}>
           {uploadCategories.map((cat) => {
             const files = getFilesByType(cat.type);
             return (
-              <View key={cat.type} className={styles.uploadCard} onClick={() => handleChooseImage(cat.type)}>
+              <View key={cat.type} className={styles.uploadCard} onClick={() => handleUpload(cat.type)}>
                 <Text className={styles.uploadCardIcon}>{cat.icon}</Text>
                 <Text className={styles.uploadCardTitle}>{cat.title}</Text>
                 <Text className={styles.uploadCardDesc}>{cat.desc}</Text>
@@ -157,7 +244,7 @@ const UploadPage = () => {
                   </View>
                 )}
                 <View className={styles.uploadBtn}>
-                  <Text className={styles.uploadBtnText}>+ 点击上传</Text>
+                  <Text className={styles.uploadBtnText}>+ 选择文件</Text>
                 </View>
               </View>
             );
@@ -165,44 +252,82 @@ const UploadPage = () => {
         </View>
       </View>
 
-      {uploadFiles.length > 0 && (
+      {totalFiles > 0 && (
         <View className={styles.fileListSection}>
-          <Text className={styles.sectionTitle}>已上传文件 ({uploadFiles.length})</Text>
-          <View className={styles.fileList}>
-            {uploadFiles.map((file) => {
-              const category = uploadCategories.find((c) => c.type === file.type);
+          <View className={styles.fileListHeader}>
+            <Text className={styles.sectionTitle}>📂 已上传资料 ({totalFiles})</Text>
+          </View>
+
+          <View className={styles.filterRow}>
+            <View
+              className={classnames(styles.filterItem, activeTab === 'all' && styles.filterActive)}
+              onClick={() => setActiveTab('all')}
+            >
+              <Text className={styles.filterLabel}>全部</Text>
+            </View>
+            {uploadCategories.map((cat) => {
+              const count = getFilesByType(cat.type).length;
+              if (count === 0) return null;
               return (
-                <View key={file.id} className={styles.fileItem}>
-                  <View className={styles.fileThumb}>
-                    {file.thumbPath ? (
-                      <Image
-                        src={file.thumbPath}
-                        mode="aspectFill"
-                        className={styles.fileThumbImg}
-                      />
-                    ) : (
-                      <Text className={styles.fileIcon}>📄</Text>
-                    )}
-                  </View>
-                  <View className={styles.fileInfo}>
-                    <Text className={styles.fileName}>{file.fileName}</Text>
-                    <Text className={styles.fileMeta}>{category?.title || '其他'} · {file.uploadTime}</Text>
-                  </View>
-                  <View className={styles.fileDelete} onClick={(e) => handleDeleteFile(file.id, e)}>
-                    <Text className={styles.fileDeleteText}>删除</Text>
-                  </View>
+                <View
+                  key={cat.type}
+                  className={classnames(styles.filterItem, activeTab === cat.type && styles.filterActive)}
+                  onClick={() => setActiveTab(cat.type)}
+                >
+                  <Text className={styles.filterLabel}>{cat.title}</Text>
                 </View>
               );
             })}
           </View>
+
+          {displayFiles.length === 0 && activeTab !== 'all' ? (
+            <View className={styles.emptyState}>
+              <Text className={styles.emptyIcon}>📂</Text>
+              <Text className={styles.emptyText}>该分类暂无资料</Text>
+            </View>
+          ) : (
+            <View className={styles.fileList}>
+              {displayFiles.map((file) => {
+                const category = uploadCategories.find((c) => c.type === file.type);
+                const isImg = !!file.thumbPath;
+                return (
+                  <View key={file.id} className={styles.fileItem}>
+                    <View
+                      className={styles.fileThumb}
+                      onClick={(e) => isImg && handlePreviewImage(file.thumbPath || file.filePath, e)}
+                    >
+                      {isImg ? (
+                        <Image
+                          src={file.thumbPath}
+                          mode="aspectFill"
+                          className={styles.fileThumbImg}
+                        />
+                      ) : (
+                        <View className={styles.fileTypeBadge}>
+                          <Text className={styles.fileTypeText}>{getFileTypeLabel(file.fileName)}</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View className={styles.fileInfo}>
+                      <Text className={styles.fileName}>{file.fileName}</Text>
+                      <Text className={styles.fileMeta}>{category?.title || '其他'} · {formatFileSize(file.size)} · {file.uploadTime}</Text>
+                    </View>
+                    <View className={styles.fileDelete} onClick={(e) => handleDeleteFile(file.id, e)}>
+                      <Text className={styles.fileDeleteText}>删除</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
       )}
 
       <View className={styles.bottomAction}>
         <View
-          className={classnames(styles.btnPrimary, uploadFiles.length === 0 && styles.btnDisabled)}
+          className={classnames(styles.btnPrimary, totalFiles === 0 && styles.btnDisabled)}
           onClick={() => {
-            if (uploadFiles.length > 0) {
+            if (totalFiles > 0) {
               Taro.switchTab({ url: '/pages/appointment/index' });
             }
           }}

@@ -63,7 +63,7 @@
 }
 
 .tabLabel {
-  font-size: $font-size-md;
+  font-size: $font-size-sm;
   color: $color-text-secondary;
   white-space: nowrap;
 
@@ -164,40 +164,6 @@
   font-size: $font-size-sm;
   color: $color-success;
   line-height: $line-height-normal;
-}
-
-.formSummary {
-  background: $color-bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
-  box-shadow: $shadow-card;
-  border-left: 6rpx solid $color-primary;
-}
-
-.formSummaryTitle {
-  display: block;
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-sm;
-}
-
-.formSummaryRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-xs 0;
-}
-
-.formSummaryLabel {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-}
-
-.formSummaryValue {
-  font-size: $font-size-sm;
-  color: $color-text-primary;
-  font-weight: $font-weight-medium;
 }
 
 .identifySection {
@@ -309,6 +275,173 @@
 }
 
 .identifyNoteText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.summarySection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  border-left: 6rpx solid $color-primary;
+}
+
+.summaryHeaderIcon {
+  font-size: 48rpx;
+  margin-right: $spacing-md;
+}
+
+.summaryHeaderText {
+  flex: 1;
+}
+
+.summaryHeaderTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.summaryHeaderDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.summaryCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.summaryCardTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.summaryContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-xs 0;
+}
+
+.summaryRowLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  margin-right: $spacing-md;
+}
+
+.summaryRowValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  text-align: right;
+  flex: 1;
+}
+
+.textWarning {
+  color: $color-risk-medium;
+}
+
+.riskBadge {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+}
+
+.riskBadgeIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+}
+
+.riskBadgeLabel {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.riskDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.summaryEmpty {
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  text-align: center;
+}
+
+.summaryEmptyText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.summarySubList {
+  padding: $spacing-sm 0 $spacing-sm $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.summarySubItem {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}
+
+.summaryTip {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+}
+
+.summaryTipText {
+  font-size: $font-size-sm;
+  color: $color-warning;
+}
+
+.summaryTipOk {
+  font-size: $font-size-sm;
+  color: $color-success;
+}
+
+.summaryNote {
+  padding: $spacing-md;
+  background: #E6F7FF;
+  border-radius: $radius-md;
+  border-left: 4rpx solid $color-info;
+}
+
+.summaryNoteText {
   font-size: $font-size-sm;
   color: $color-text-secondary;
   line-height: $line-height-loose;

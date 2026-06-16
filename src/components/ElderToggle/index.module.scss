@@ -27,6 +27,10 @@
   background: rgba($color-primary, 0.1);
 }
 
+.toggleDisabled {
+  opacity: 0.5;
+}
+
 .toggleIcon {
   font-size: 32rpx;
   margin-right: $spacing-xs;
@@ -52,6 +56,10 @@
   background: $color-primary;
 }
 
+.switchDisabled {
+  background: $color-text-disabled;
+}
+
 .toggleDot {
   width: 24rpx;
   height: 24rpx;
@@ -65,4 +73,24 @@
   .switchOn & {
     left: 28rpx;
   }
+}
+
+.voiceWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.voiceUnavailable {
+  padding: $spacing-xs $spacing-md;
+  background: rgba($color-warning, 0.08);
+  border-radius: $radius-sm;
+  border-left: 4rpx solid $color-warning;
+}
+
+.voiceUnavailableText {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  line-height: $line-height-normal;
 }

@@ -61,14 +61,18 @@ export const riskResultSpeakText = (result: RiskResult): string => {
   }
 };
 
-let speechInstance: SpeechSynthesisUtterance | null = null;
 let isSpeaking = false;
 
-export const speakText = (text: string): void => {
+export const canUseSpeech = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return typeof window.speechSynthesis === 'object' && window.speechSynthesis !== null;
+};
+
+export const speakText = (text: string): boolean => {
   try {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      console.info('[Speech]', '当前环境不支持语音合成');
-      return;
+    if (!canUseSpeech()) {
+      console.info('[Speech]', '当前环境不支持语音合成，无法播报');
+      return false;
     }
 
     window.speechSynthesis.cancel();
@@ -94,16 +98,17 @@ export const speakText = (text: string): void => {
       console.error('[Speech]', '播报出错:', e);
     };
 
-    speechInstance = utterance;
     window.speechSynthesis.speak(utterance);
+    return true;
   } catch (e) {
     console.error('[Speech]', '语音播报失败:', e);
+    return false;
   }
 };
 
 export const stopSpeech = (): void => {
   try {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (canUseSpeech()) {
       window.speechSynthesis.cancel();
       isSpeaking = false;
       console.info('[Speech]', '已停止播报');
