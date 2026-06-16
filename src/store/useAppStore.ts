@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
   UPLOAD_FILES: 'mri_upload_files',
   CHECKLIST_CHECKED: 'mri_checklist_checked',
   METAL_HANDLED: 'mri_metal_handled',
+  ARRIVAL_TODO_DONE: 'mri_arrival_todo_done',
 };
 
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
@@ -62,6 +63,7 @@ interface AppState {
   uploadFiles: UploadFile[];
   metalReminders: MetalReminderItem[];
   checklistChecked: string[];
+  arrivalTodoDone: string[];
 
   setAnswer: (answer: Answer) => void;
   setElderMode: (enabled: boolean) => void;
@@ -81,6 +83,10 @@ interface AppState {
 
   toggleChecklistItem: (id: string) => void;
   isChecklistChecked: (id: string) => boolean;
+
+  toggleArrivalTodo: (id: string) => void;
+  isArrivalTodoDone: (id: string) => boolean;
+  clearArrivalTodo: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -99,6 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   })(),
   checklistChecked: loadFromStorage<string[]>(STORAGE_KEYS.CHECKLIST_CHECKED, []),
+  arrivalTodoDone: loadFromStorage<string[]>(STORAGE_KEYS.ARRIVAL_TODO_DONE, []),
 
   setAnswer: (answer) =>
     set((state) => {
@@ -189,5 +196,26 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isChecklistChecked: (id) => {
     return get().checklistChecked.includes(id);
+  },
+
+  toggleArrivalTodo: (id) =>
+    set((state) => {
+      let newDone: string[];
+      if (state.arrivalTodoDone.includes(id)) {
+        newDone = state.arrivalTodoDone.filter((tid) => tid !== id);
+      } else {
+        newDone = [...state.arrivalTodoDone, id];
+      }
+      saveToStorage(STORAGE_KEYS.ARRIVAL_TODO_DONE, newDone);
+      return { arrivalTodoDone: newDone };
+    }),
+
+  isArrivalTodoDone: (id) => {
+    return get().arrivalTodoDone.includes(id);
+  },
+
+  clearArrivalTodo: () => {
+    saveToStorage(STORAGE_KEYS.ARRIVAL_TODO_DONE, []);
+    set({ arrivalTodoDone: [] });
   },
 }));

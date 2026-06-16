@@ -15,12 +15,14 @@ interface TodoItem {
   done: boolean;
   urgent: boolean;
   category: 'metal' | 'checklist' | 'upload' | 'document';
+  toggleAction?: () => void;
 }
 
 const GuidePage = () => {
   const {
     elderMode, voiceEnabled, metalReminders, toggleMetalReminder,
-    getMetalHandledCount, uploadFiles, getFilesByType, checklistChecked,
+    getMetalHandledCount, getFilesByType, checklistChecked,
+    toggleChecklistItem, toggleArrivalTodo, isArrivalTodoDone,
   } = useAppStore();
   const [showCode, setShowCode] = useState(false);
   const [feedbackRatings, setFeedbackRatings] = useState<Record<string, number>>({});
@@ -32,30 +34,29 @@ const GuidePage = () => {
   const todoList = useMemo<TodoItem[]>(() => {
     const items: TodoItem[] = [];
 
-    const uncheckedChecklist = checklistData.filter((c) => !checklistChecked.includes(c.id));
-    uncheckedChecklist.forEach((item) => {
+    checklistData.forEach((item) => {
       const icons: Record<string, string> = { document: '📄', diet: '🍽️', prepare: '👗', metal: '💍' };
+      const done = checklistChecked.includes(item.id);
       items.push({
         id: `check_${item.id}`,
         icon: icons[item.category] || '📋',
         title: item.text,
         desc: '检查前需确认',
-        done: false,
+        done,
         urgent: item.category === 'metal',
         category: item.category === 'metal' ? 'metal' : 'checklist',
       });
     });
 
-    const unhandledMetals = metalReminders.filter((m) => !m.handled);
-    unhandledMetals.forEach((item) => {
-      const exists = items.some((i) => i.id === `metal_${item.id}`);
+    metalReminders.forEach((m) => {
+      const exists = items.some((i) => i.id === `metal_${m.id}`);
       if (!exists) {
         items.push({
-          id: `metal_${item.id}`,
-          icon: item.icon,
-          title: `取下${item.title}`,
-          desc: item.desc,
-          done: false,
+          id: `metal_${m.id}`,
+          icon: m.icon,
+          title: `取下${m.title}`,
+          desc: m.desc,
+          done: m.handled,
           urgent: true,
           category: 'metal',
         });
@@ -69,31 +70,35 @@ const GuidePage = () => {
     ];
     uploadTypes.forEach((req) => {
       const count = getFilesByType(req.type).length;
-      if (count === 0) {
+      const todoId = `upload_${req.type}`;
+      const userConfirmedDone = isArrivalTodoDone(todoId);
+      const done = count > 0 || userConfirmedDone;
+      if (!done || !userConfirmedDone) {
         items.push({
-          id: `upload_${req.type}`,
+          id: todoId,
           icon: req.icon,
-          title: `补传${req.label}`,
-          desc: '到院前建议上传',
-          done: false,
+          title: count > 0 ? `已上传${req.label}（${count}份）` : `补传${req.label}`,
+          desc: count > 0 ? '已上传，点击确认' : '到院前建议上传，暂无也可点击确认',
+          done: userConfirmedDone,
           urgent: false,
           category: 'upload',
         });
       }
     });
 
+    const docDone = isArrivalTodoDone('doc_id');
     items.push({
       id: 'doc_id',
       icon: '🪪',
       title: '携带身份证和医保卡',
-      desc: '窗口签到时需要',
-      done: false,
+      desc: '窗口签到时需要，确认已带请点击',
+      done: docDone,
       urgent: false,
       category: 'document',
     });
 
     return items;
-  }, [metalReminders, checklistChecked, uploadFiles]);
+  }, [metalReminders, checklistChecked, isArrivalTodoDone, getFilesByType]);
 
   const doneCount = todoList.filter((t) => t.done).length;
   const pendingItems = todoList.filter((t) => !t.done);
@@ -121,6 +126,37 @@ const GuidePage = () => {
       }
     }
   }, []);
+
+  const handleTodoClick = (item: TodoItem) => {
+    if (item.category === 'metal') {
+      const metalId = item.id.replace('metal_', '');
+      const checkId = item.id.replace('check_', '');
+      if (item.id.startsWith('metal_')) {
+        toggleMetalReminder(metalId);
+      }
+      if (item.id.startsWith('check_')) {
+        toggleChecklistItem(checkId);
+        const matchingMetal = metalReminders.find((m) => m.title.includes(checklistData.find((c) => c.id === checkId)?.text || ''));
+        if (matchingMetal) {
+          toggleMetalReminder(matchingMetal.id);
+        }
+      }
+      if (voiceEnabled && speechOk) {
+        speakText(`${item.title}，已${item.done ? '取消' : '完成'}`);
+      }
+    } else if (item.category === 'checklist') {
+      const checkId = item.id.replace('check_', '');
+      toggleChecklistItem(checkId);
+      if (voiceEnabled && speechOk) {
+        speakText(`${item.title}，已${item.done ? '取消确认' : '确认'}`);
+      }
+    } else {
+      toggleArrivalTodo(item.id);
+      if (voiceEnabled && speechOk) {
+        speakText(`${item.title}，已${item.done ? '取消确认' : '确认完成'}`);
+      }
+    }
+  };
 
   const handleToggleMetal = (id: string) => {
     toggleMetalReminder(id);
@@ -204,15 +240,16 @@ const GuidePage = () => {
         {!allDone && (
           <Text className={styles.sectionSubtitle}>
             {urgentItems.length > 0
-              ? `⚠️ ${urgentItems.length}项需签到前处理`
-              : `还有${pendingItems.length}项待完成`}
+              ? `⚠️ ${urgentItems.length}项需签到前处理，点击条目可标记完成`
+              : `还有${pendingItems.length}项待确认，点击条目可标记完成`}
           </Text>
         )}
 
         {allDone ? (
           <View className={styles.allDoneCard}>
             <Text className={styles.allDoneIcon}>🎉</Text>
-            <Text className={styles.allDoneText}>所有事项已处理完毕，安心检查！</Text>
+            <Text className={styles.allDoneTitle}>所有事项已处理完毕</Text>
+            <Text className={styles.allDoneText}>请安心检查，祝您检查顺利！</Text>
           </View>
         ) : (
           <View className={styles.todoList}>
@@ -224,7 +261,18 @@ const GuidePage = () => {
                   item.done && styles.todoItemDone,
                   item.urgent && !item.done && styles.todoItemUrgent,
                 )}
+                onClick={() => handleTodoClick(item)}
               >
+                <View className={styles.todoCheckbox}>
+                  <View
+                    className={classnames(
+                      styles.checkboxBox,
+                      item.done && styles.checkboxBoxChecked,
+                    )}
+                  >
+                    {item.done && <Text className={styles.checkboxTick}>✓</Text>}
+                  </View>
+                </View>
                 <View className={styles.todoItemLeft}>
                   <Text className={styles.todoIcon}>{item.icon}</Text>
                   <View className={styles.todoInfo}>
@@ -232,72 +280,55 @@ const GuidePage = () => {
                     <Text className={styles.todoDesc}>{item.desc}</Text>
                   </View>
                 </View>
-                {item.category === 'metal' && (
-                  <View
-                    className={classnames(
-                      styles.todoAction,
-                      metalReminders.find((m) => `metal_${m.id}` === item.id)?.handled
-                        ? styles.todoActionDone
-                        : styles.todoActionPending,
-                    )}
-                    onClick={() => {
-                      const metalItem = metalReminders.find((m) => `metal_${m.id}` === item.id);
-                      if (metalItem) {
-                        handleToggleMetal(metalItem.id);
-                      }
-                    }}
-                  >
-                    <Text className={styles.todoActionText}>
-                      {metalReminders.find((m) => `metal_${m.id}` === item.id)?.handled ? '✓ 已处理' : '标记处理'}
-                    </Text>
-                  </View>
-                )}
-                {item.category !== 'metal' && (
-                  <View className={classnames(styles.todoStatus, item.urgent ? styles.todoStatusUrgent : styles.todoStatusPending)}>
-                    <Text className={styles.todoStatusText}>{item.urgent ? '⚠️ 必须' : '待办'}</Text>
-                  </View>
-                )}
+                <View
+                  className={classnames(
+                    styles.todoAction,
+                    item.done ? styles.todoActionDone : styles.todoActionPending,
+                  )}
+                >
+                  <Text className={styles.todoActionText}>
+                    {item.done ? '已完成' : '点我完成'}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>
         )}
       </View>
 
-      {metalTotal > 0 && (
-        <View className={styles.remindSection}>
-          <View className={styles.remindSectionHeader}>
-            <Text className={styles.sectionTitle}>⚠️ 金属物品去除</Text>
-            <Text className={styles.remindProgress}>{metalHandled}/{metalTotal}</Text>
-          </View>
-          <View className={styles.remindGrid}>
-            {metalReminders.map((item) => (
-              <View
-                key={item.id}
-                className={classnames(styles.remindItem, item.handled && styles.remindItemDone)}
-                onClick={() => handleToggleMetal(item.id)}
-              >
-                <View className={styles.remindItemLeft}>
-                  <Text className={styles.remindIcon}>{item.icon}</Text>
-                  <View className={styles.remindInfo}>
-                    <Text className={styles.remindTitle}>{item.title}</Text>
-                    <Text className={styles.remindDesc}>{item.desc}</Text>
-                  </View>
-                </View>
-                <View
-                  className={classnames(
-                    styles.remindStatus,
-                    item.handled ? styles.remindStatusDone : styles.remindStatusTodo,
-                  )}
-                >
-                  <Text className={styles.remindStatusText}>
-                    {item.handled ? '✓ 已处理' : '未处理'}
-                  </Text>
+      <View className={styles.remindSection}>
+        <View className={styles.remindSectionHeader}>
+          <Text className={styles.sectionTitle}>⚠️ 金属物品去除</Text>
+          <Text className={styles.remindProgress}>{metalHandled}/{metalTotal}</Text>
+        </View>
+        <View className={styles.remindGrid}>
+          {metalReminders.map((item) => (
+            <View
+              key={item.id}
+              className={classnames(styles.remindItem, item.handled && styles.remindItemDone)}
+              onClick={() => handleToggleMetal(item.id)}
+            >
+              <View className={styles.remindItemLeft}>
+                <Text className={styles.remindIcon}>{item.icon}</Text>
+                <View className={styles.remindInfo}>
+                  <Text className={styles.remindTitle}>{item.title}</Text>
+                  <Text className={styles.remindDesc}>{item.desc}</Text>
                 </View>
               </View>
-            ))}
-          </View>
+              <View
+                className={classnames(
+                  styles.remindStatus,
+                  item.handled ? styles.remindStatusDone : styles.remindStatusTodo,
+                )}
+              >
+                <Text className={styles.remindStatusText}>
+                  {item.handled ? '✓ 已处理' : '未处理'}
+                </Text>
+              </View>
+            </View>
+          ))}
         </View>
-      )}
+      </View>
 
       <View className={styles.processSection}>
         <Text className={styles.sectionTitle}>📋 到院流程</Text>

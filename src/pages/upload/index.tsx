@@ -5,6 +5,11 @@ import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { enhanceMRIInfo } from '@/data/questions';
 import { speakText, stopSpeech, canUseSpeech } from '@/utils/riskAssess';
+import {
+  isImageFile, formatFileSize, getFileTypeLabel,
+  saveFilePermanently, previewImageFile, openDocumentFile,
+  getAccessibleFilePath, isPdfFile, isDocFile,
+} from '@/utils/fileUtils';
 import ElderToggle from '@/components/ElderToggle';
 import type { UploadFile } from '@/types/mri';
 import styles from './index.module.scss';
@@ -16,30 +21,11 @@ const uploadCategories = [
   { type: 'other' as const, title: '其他资料', icon: '📎', desc: '检查单、转诊单等', accept: 'all' },
 ];
 
-const isImageFile = (fileName: string): boolean => {
-  const ext = fileName.toLowerCase().split('.').pop() || '';
-  return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
-};
-
-const formatFileSize = (size: number): string => {
-  if (size < 1024) return `${size}B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)}MB`;
-};
-
-const getFileTypeLabel = (fileName: string): string => {
-  const ext = fileName.toLowerCase().split('.').pop() || '';
-  const map: Record<string, string> = {
-    pdf: 'PDF', doc: 'Word', docx: 'Word', xls: 'Excel', xlsx: 'Excel',
-    jpg: '图片', jpeg: '图片', png: '图片', gif: '图片', bmp: '图片', webp: '图片',
-  };
-  return map[ext] || ext.toUpperCase();
-};
-
 const UploadPage = () => {
   const { elderMode, getHighestRisk, voiceEnabled, uploadFiles, addUploadFile, removeUploadFile, getFilesByType } = useAppStore();
   const [showEnhanceInfo, setShowEnhanceInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [saving, setSaving] = useState(false);
 
   const riskResult = getHighestRisk();
   const speechOk = canUseSpeech();
@@ -61,26 +47,44 @@ const UploadPage = () => {
       });
 
       if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+        setSaving(true);
         const category = uploadCategories.find((c) => c.type === type);
-        res.tempFilePaths.forEach((path, index) => {
+        let successCount = 0;
+
+        for (let i = 0; i < res.tempFilePaths.length; i++) {
+          const path = res.tempFilePaths[i];
           const now = Date.now();
+          const size = res.tempFiles?.[i]?.size || 0;
+
+          let permanentPath: string | undefined;
+          try {
+            permanentPath = await saveFilePermanently(path);
+          } catch (e) {
+            console.warn('[Upload]', '持久化失败，使用临时路径:', e);
+          }
+
           const file: UploadFile = {
-            id: `img_${now}_${index}`,
+            id: `img_${now}_${i}`,
             type: type as UploadFile['type'],
-            fileName: `${category?.title || '资料'}_${index + 1}.jpg`,
+            fileName: `${category?.title || '资料'}_${i + 1}.jpg`,
             filePath: path,
-            thumbPath: path,
+            thumbPath: permanentPath || path,
+            permanentPath,
             uploadTime: new Date(now).toLocaleString('zh-CN'),
-            size: res.tempFiles?.[index]?.size || 0,
+            size,
           };
           addUploadFile(file);
-        });
-        if (voiceEnabled && speechOk) {
-          speakText(`已上传${res.tempFilePaths.length}张图片`);
+          successCount++;
         }
-        Taro.showToast({ title: `已上传${res.tempFilePaths.length}张`, icon: 'success' });
+
+        setSaving(false);
+        if (voiceEnabled && speechOk) {
+          speakText(`已上传${successCount}张图片`);
+        }
+        Taro.showToast({ title: `已上传${successCount}张`, icon: 'success' });
       }
     } catch (e) {
+      setSaving(false);
       console.error('[Upload]', '选择图片失败:', e);
     }
   };
@@ -93,26 +97,45 @@ const UploadPage = () => {
       });
 
       if (res.tempFiles && res.tempFiles.length > 0) {
+        setSaving(true);
         const category = uploadCategories.find((c) => c.type === type);
-        res.tempFiles.forEach((file, index) => {
+        let successCount = 0;
+
+        for (let i = 0; i < res.tempFiles.length; i++) {
+          const fileInfo = res.tempFiles[i];
           const now = Date.now();
-          const uploadFile: UploadFile = {
-            id: `doc_${now}_${index}`,
+          const fileName = fileInfo.name || `${category?.title || '资料'}_${i + 1}`;
+
+          let permanentPath: string | undefined;
+          try {
+            permanentPath = await saveFilePermanently(fileInfo.path);
+          } catch (e) {
+            console.warn('[Upload]', '文件持久化失败:', e);
+          }
+
+          const isImg = isImageFile(fileName);
+          const file: UploadFile = {
+            id: `doc_${now}_${i}`,
             type: type as UploadFile['type'],
-            fileName: file.name || `${category?.title || '资料'}_${index + 1}`,
-            filePath: file.path,
-            thumbPath: isImageFile(file.name || '') ? file.path : undefined,
+            fileName,
+            filePath: fileInfo.path,
+            thumbPath: isImg ? (permanentPath || fileInfo.path) : undefined,
+            permanentPath,
             uploadTime: new Date(now).toLocaleString('zh-CN'),
-            size: file.size || 0,
+            size: fileInfo.size || 0,
           };
-          addUploadFile(uploadFile);
-        });
-        if (voiceEnabled && speechOk) {
-          speakText(`已上传${res.tempFiles.length}个文件`);
+          addUploadFile(file);
+          successCount++;
         }
-        Taro.showToast({ title: `已上传${res.tempFiles.length}个文件`, icon: 'success' });
+
+        setSaving(false);
+        if (voiceEnabled && speechOk) {
+          speakText(`已上传${successCount}个文件`);
+        }
+        Taro.showToast({ title: `已上传${successCount}个文件`, icon: 'success' });
       }
     } catch (e) {
+      setSaving(false);
       console.error('[Upload]', '选择文件失败:', e);
       handleChooseImage(type);
     }
@@ -135,20 +158,29 @@ const UploadPage = () => {
       success: (res) => {
         if (res.confirm) {
           removeUploadFile(id);
+          Taro.showToast({ title: '已删除', icon: 'none' });
         }
       },
     });
   };
 
-  const handlePreviewImage = (filePath: string, e) => {
-    e.stopPropagation();
-    const allImageUrls = displayFiles
-      .filter((f) => f.thumbPath)
-      .map((f) => f.thumbPath || f.filePath);
-    Taro.previewImage({
-      current: filePath,
-      urls: allImageUrls,
-    });
+  const handlePreviewFile = (file: UploadFile) => {
+    const accessiblePath = getAccessibleFilePath(file);
+
+    if (isImageFile(file.fileName)) {
+      const allImageFiles = uploadFiles.filter((f) => isImageFile(f.fileName) && f.type === file.type);
+      const allUrls = allImageFiles.map((f) => getAccessibleFilePath(f));
+      previewImageFile(accessiblePath, allUrls);
+      return;
+    }
+
+    if (isPdfFile(file.fileName) || isDocFile(file.fileName)) {
+      const ext = file.fileName.toLowerCase().split('.').pop() || '';
+      openDocumentFile(accessiblePath, ext);
+      return;
+    }
+
+    Taro.showToast({ title: '暂不支持预览此类型', icon: 'none' });
   };
 
   const displayFiles = activeTab === 'all'
@@ -290,15 +322,17 @@ const UploadPage = () => {
               {displayFiles.map((file) => {
                 const category = uploadCategories.find((c) => c.type === file.type);
                 const isImg = !!file.thumbPath;
+                const canPreview = isImg || isPdfFile(file.fileName) || isDocFile(file.fileName);
                 return (
-                  <View key={file.id} className={styles.fileItem}>
-                    <View
-                      className={styles.fileThumb}
-                      onClick={(e) => isImg && handlePreviewImage(file.thumbPath || file.filePath, e)}
-                    >
+                  <View
+                    key={file.id}
+                    className={classnames(styles.fileItem, canPreview && styles.fileItemClickable)}
+                    onClick={() => canPreview && handlePreviewFile(file)}
+                  >
+                    <View className={styles.fileThumb}>
                       {isImg ? (
                         <Image
-                          src={file.thumbPath}
+                          src={getAccessibleFilePath(file)}
                           mode="aspectFill"
                           className={styles.fileThumbImg}
                         />
@@ -310,7 +344,12 @@ const UploadPage = () => {
                     </View>
                     <View className={styles.fileInfo}>
                       <Text className={styles.fileName}>{file.fileName}</Text>
-                      <Text className={styles.fileMeta}>{category?.title || '其他'} · {formatFileSize(file.size)} · {file.uploadTime}</Text>
+                      <Text className={styles.fileMeta}>
+                        {category?.title || '其他'} · {formatFileSize(file.size)} · {file.uploadTime}
+                      </Text>
+                      {canPreview && (
+                        <Text className={styles.filePreviewTip}>点击查看</Text>
+                      )}
                     </View>
                     <View className={styles.fileDelete} onClick={(e) => handleDeleteFile(file.id, e)}>
                       <Text className={styles.fileDeleteText}>删除</Text>
@@ -320,6 +359,15 @@ const UploadPage = () => {
               })}
             </View>
           )}
+        </View>
+      )}
+
+      {saving && (
+        <View className={styles.savingMask}>
+          <View className={styles.savingBox}>
+            <Text className={styles.savingIcon}>📥</Text>
+            <Text className={styles.savingText}>正在保存资料...</Text>
+          </View>
         </View>
       )}
 

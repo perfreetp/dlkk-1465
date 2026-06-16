@@ -216,24 +216,33 @@
 }
 
 .allDoneCard {
-  padding: $spacing-xxl;
+  padding: $spacing-xxl $spacing-lg;
   background: $color-bg-card;
   border-radius: $radius-lg;
   box-shadow: $shadow-card;
   text-align: center;
+  border: 2rpx solid rgba($color-success, 0.2);
+  background: linear-gradient(135deg, rgba($color-success, 0.05) 0%, $color-bg-card 100%);
 }
 
 .allDoneIcon {
-  font-size: 64rpx;
+  font-size: 80rpx;
   display: block;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.allDoneTitle {
+  display: block;
+  font-size: $font-size-xl;
+  color: $color-success;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
 }
 
 .allDoneText {
   display: block;
-  font-size: $font-size-lg;
-  color: $color-success;
-  font-weight: $font-weight-semibold;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
 }
 
 .todoList {
@@ -252,6 +261,35 @@
   box-shadow: $shadow-card;
   border-left: 4rpx solid $color-border;
   transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.todoCheckbox {
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.checkboxBox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid $color-border;
+  border-radius: 8rpx;
+  @include flex-center;
+  transition: all $transition-base;
+}
+
+.checkboxBoxChecked {
+  background: $color-success;
+  border-color: $color-success;
+}
+
+.checkboxTick {
+  font-size: 24rpx;
+  color: $color-text-white;
+  font-weight: $font-weight-bold;
 }
 
 .todoItemDone {

@@ -38,6 +38,8 @@ export interface UploadFile {
   fileName: string;
   filePath: string;
   thumbPath?: string;
+  permanentPath?: string;
+  fileData?: string;
   uploadTime: string;
   size: number;
 }

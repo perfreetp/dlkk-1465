@@ -2,18 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { View, Text } from '@tarojs/components';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
-import { stopSpeech, canUseSpeech } from '@/utils/riskAssess';
+import { stopSpeech, canUseSpeech, getSpeechNotAvailableReason } from '@/utils/riskAssess';
 import styles from './index.module.scss';
 
 const ElderToggle: React.FC = () => {
   const { elderMode, setElderMode, voiceEnabled, setVoiceEnabled } = useAppStore();
   const [speechAvailable, setSpeechAvailable] = useState(true);
+  const [speechReason, setSpeechReason] = useState('');
 
   useEffect(() => {
-    setSpeechAvailable(canUseSpeech());
+    const available = canUseSpeech();
+    setSpeechAvailable(available);
+    if (!available) {
+      setSpeechReason(getSpeechNotAvailableReason());
+    }
   }, []);
 
   const handleVoiceToggle = () => {
+    if (!speechAvailable) return;
     const newValue = !voiceEnabled;
     setVoiceEnabled(newValue);
     if (!newValue) {
@@ -37,24 +43,26 @@ const ElderToggle: React.FC = () => {
         <View
           className={classnames(
             styles.toggleItem,
-            voiceEnabled && styles.toggleActive,
+            voiceEnabled && speechAvailable && styles.toggleActive,
             !speechAvailable && styles.toggleDisabled,
           )}
-          onClick={() => {
-            if (speechAvailable) {
-              handleVoiceToggle();
-            }
-          }}
+          onClick={handleVoiceToggle}
         >
           <Text className={styles.toggleIcon}>🔊</Text>
           <Text className={styles.toggleLabel}>语音播报</Text>
-          <View className={classnames(styles.toggleSwitch, voiceEnabled && speechAvailable && styles.switchOn, !speechAvailable && styles.switchDisabled)}>
+          <View
+            className={classnames(
+              styles.toggleSwitch,
+              voiceEnabled && speechAvailable && styles.switchOn,
+              !speechAvailable && styles.switchDisabled,
+            )}
+          >
             <View className={styles.toggleDot} />
           </View>
         </View>
-        {!speechAvailable && (
+        {!speechAvailable && speechReason && (
           <View className={styles.voiceUnavailable}>
-            <Text className={styles.voiceUnavailableText}>⚠️ 当前环境不支持语音播报，请阅读文字内容</Text>
+            <Text className={styles.voiceUnavailableText}>⚠️ {speechReason}</Text>
           </View>
         )}
       </View>
