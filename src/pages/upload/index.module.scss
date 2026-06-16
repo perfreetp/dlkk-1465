@@ -1,0 +1,283 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: 0 $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.elderMode {
+  font-size: $font-size-lg;
+}
+
+.header {
+  padding: $spacing-xl 0 $spacing-lg;
+  background: linear-gradient(180deg, rgba($color-primary, 0.08) 0%, transparent 100%);
+  margin: 0 (-$page-padding);
+  padding-left: $page-padding;
+  padding-right: $page-padding;
+}
+
+.headerTitle {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.riskWarning {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background: rgba($color-risk-high, 0.08);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-risk-high;
+  margin-bottom: $spacing-md;
+}
+
+.riskWarningIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+}
+
+.riskWarningText {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-risk-high;
+  line-height: $line-height-normal;
+}
+
+.enhanceCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+  border-left: 6rpx solid $color-enhance;
+}
+
+.enhanceHeader {
+  display: flex;
+  align-items: center;
+}
+
+.enhanceIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+}
+
+.enhanceTitle {
+  flex: 1;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-enhance;
+}
+
+.enhanceArrow {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  transition: transform $transition-base;
+}
+
+.enhanceArrowOpen {
+  transform: rotate(180deg);
+}
+
+.enhanceBody {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.enhanceItem {
+  display: flex;
+  align-items: flex-start;
+}
+
+.enhanceItemLabel {
+  width: 200rpx;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.enhanceItemValue {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.uploadSection {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.uploadGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.uploadCard {
+  width: calc(50% - #{$spacing-md} / 2);
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  position: relative;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.uploadCardIcon {
+  display: block;
+  font-size: 48rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.uploadCardTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.uploadCardDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-md;
+}
+
+.uploadBadge {
+  position: absolute;
+  top: $spacing-sm;
+  right: $spacing-sm;
+  width: 36rpx;
+  height: 36rpx;
+  @include flex-center;
+  background: $color-primary;
+  border-radius: $radius-round;
+}
+
+.uploadBadgeText {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+}
+
+.uploadBtn {
+  padding: $spacing-xs $spacing-md;
+  background: rgba($color-primary, 0.08);
+  border-radius: $radius-button;
+  @include flex-center;
+}
+
+.uploadBtnText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  white-space: nowrap;
+}
+
+.fileList {
+  margin-bottom: $spacing-lg;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  box-shadow: $shadow-card;
+}
+
+.fileIcon {
+  width: 64rpx;
+  height: 64rpx;
+  @include flex-center;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.fileInfo {
+  flex: 1;
+}
+
+.fileName {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.fileStatus {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-success;
+  margin-top: 4rpx;
+}
+
+.bottomAction {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.btnPrimary {
+  height: $button-height-lg;
+  @include flex-center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnDisabled {
+  opacity: 0.5;
+}
+
+.btnPrimaryText {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}

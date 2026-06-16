@@ -1,0 +1,438 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: 0 $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.elderMode {
+  font-size: $font-size-lg;
+}
+
+.header {
+  padding: $spacing-xl 0 $spacing-lg;
+  background: linear-gradient(180deg, rgba($color-primary, 0.08) 0%, transparent 100%);
+  margin: 0 (-$page-padding);
+  padding-left: $page-padding;
+  padding-right: $page-padding;
+}
+
+.headerTitle {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.toggleWrap {
+  margin-bottom: $spacing-lg;
+}
+
+.patientTypeSection {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.patientTypeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.patientTypeItem {
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.patientTypeActive {
+  background: rgba($color-primary, 0.1);
+  border-color: $color-primary;
+}
+
+.patientTypeLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  white-space: nowrap;
+
+  .patientTypeActive & {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.reminderCard {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: #FFF8E6;
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-warning;
+}
+
+.reminderTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.reminderText {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.questionSection {
+  margin-bottom: $spacing-lg;
+}
+
+.progressRow {
+  margin-bottom: $spacing-md;
+}
+
+.progressText {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.progressBar {
+  height: 8rpx;
+  background: $color-divider;
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: 4rpx;
+  transition: width $transition-base;
+}
+
+.questionCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+}
+
+.questionIcon {
+  display: block;
+  font-size: 56rpx;
+  margin-bottom: $spacing-md;
+}
+
+.questionTitle {
+  display: block;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.questionDesc {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xl;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.optionItem {
+  display: flex;
+  align-items: flex-start;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.optionSelected {
+  background: rgba($color-primary, 0.05);
+  border-color: $color-primary;
+}
+
+.optionHigh {
+  &.optionSelected {
+    border-color: $color-risk-high;
+    background: rgba($color-risk-high, 0.05);
+  }
+}
+
+.optionMedium {
+  &.optionSelected {
+    border-color: $color-risk-medium;
+    background: rgba($color-risk-medium, 0.05);
+  }
+}
+
+.optionRadio {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-border;
+  @include flex-center;
+  margin-right: $spacing-md;
+  margin-top: 4rpx;
+  flex-shrink: 0;
+
+  .optionSelected & {
+    border-color: $color-primary;
+  }
+
+  .optionHigh& {
+    border-color: $color-risk-high;
+  }
+
+  .optionMedium& {
+    border-color: $color-risk-medium;
+  }
+}
+
+.optionRadioInner {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+
+  .optionHigh & {
+    background: $color-risk-high;
+  }
+
+  .optionMedium & {
+    background: $color-risk-medium;
+  }
+}
+
+.optionContent {
+  flex: 1;
+}
+
+.optionLabel {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.optionDetail {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: $spacing-xs;
+  line-height: $line-height-normal;
+}
+
+.actionRow {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.btnPrev {
+  flex: 1;
+  height: $button-height-md;
+  @include flex-center;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.btnPrevText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  white-space: nowrap;
+}
+
+.btnNext {
+  flex: 2;
+  height: $button-height-md;
+  @include flex-center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnDisabled {
+  opacity: 0.5;
+}
+
+.btnNextText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.resultSection {
+  margin-bottom: $spacing-lg;
+}
+
+.resultCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.resultHigh {
+  border-top: 6rpx solid $color-risk-high;
+}
+
+.resultMedium {
+  border-top: 6rpx solid $color-risk-medium;
+}
+
+.resultLow {
+  border-top: 6rpx solid $color-risk-low;
+}
+
+.resultIcon {
+  display: block;
+  font-size: 72rpx;
+  margin-bottom: $spacing-md;
+}
+
+.resultDesc {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-top: $spacing-md;
+  text-align: left;
+}
+
+.answersSummary {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+}
+
+.summaryTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.summaryQ {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-right: $spacing-sm;
+}
+
+.summaryA {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}
+
+.resultActions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.btnPrimary {
+  height: $button-height-lg;
+  @include flex-center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnPrimaryText {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.btnSecondary {
+  height: $button-height-md;
+  @include flex-center;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.btnSecondaryText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  white-space: nowrap;
+}

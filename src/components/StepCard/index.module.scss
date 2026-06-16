@@ -1,0 +1,84 @@
+@use '@/styles/variables.scss' as *;
+
+.stepCard {
+  display: flex;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.active {
+  border-left: 6rpx solid $color-primary;
+  background: linear-gradient(135deg, rgba($color-primary, 0.05) 0%, $color-bg-card 100%);
+}
+
+.completed {
+  border-left: 6rpx solid $color-success;
+}
+
+.stepLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: $spacing-md;
+}
+
+.stepBadge {
+  @include flex-center;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  background: $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.stepBadgeDone {
+  background: $color-success;
+  color: $color-text-white;
+}
+
+.stepLine {
+  width: 4rpx;
+  flex: 1;
+  min-height: 24rpx;
+  background: $color-divider;
+  margin-top: $spacing-xs;
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepTitleRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.stepIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-sm;
+}
+
+.stepTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.stepDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}

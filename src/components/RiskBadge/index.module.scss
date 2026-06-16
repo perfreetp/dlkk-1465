@@ -1,0 +1,28 @@
+@use '@/styles/variables.scss' as *;
+
+.riskBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  border: 2rpx solid transparent;
+}
+
+.riskBadgeLarge {
+  padding: $spacing-sm $spacing-lg;
+}
+
+.riskIcon {
+  font-size: 28rpx;
+  margin-right: $spacing-xs;
+}
+
+.riskLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.riskLabelLarge {
+  font-size: $font-size-md;
+}

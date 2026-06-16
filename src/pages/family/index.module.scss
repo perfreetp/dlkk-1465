@@ -1,0 +1,281 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: 0 $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.elderMode {
+  font-size: $font-size-lg;
+}
+
+.header {
+  padding: $spacing-xl 0 $spacing-lg;
+  background: linear-gradient(180deg, rgba($color-primary, 0.08) 0%, transparent 100%);
+  margin: 0 (-$page-padding);
+  padding-left: $page-padding;
+  padding-right: $page-padding;
+}
+
+.headerTitle {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.toggleWrap {
+  margin-bottom: $spacing-lg;
+}
+
+.tabRow {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  padding: 4rpx;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.tabItem {
+  flex: 1;
+  height: 72rpx;
+  @include flex-center;
+  border-radius: 48rpx - 4rpx;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.tabActive {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.tabLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  white-space: nowrap;
+
+  .tabActive & {
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.formCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.cardTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.formItem {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.formLabel {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.relationGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.relationItem {
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.relationActive {
+  background: rgba($color-primary, 0.1);
+  border-color: $color-primary;
+}
+
+.relationLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+
+  .relationActive & {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.saveTip {
+  padding: $spacing-md;
+  background: rgba($color-success, 0.08);
+  border-radius: $radius-md;
+}
+
+.saveTipText {
+  font-size: $font-size-sm;
+  color: $color-success;
+  line-height: $line-height-normal;
+}
+
+.identifySection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.identifyTip {
+  padding: $spacing-md;
+  background: #E6F7FF;
+  border-radius: $radius-md;
+}
+
+.identifyTipText {
+  font-size: $font-size-md;
+  color: $color-info;
+  line-height: $line-height-normal;
+}
+
+.implantList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.implantCard {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.implantImageWrap {
+  width: 120rpx;
+  height: 120rpx;
+  @include flex-center;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.implantImagePlaceholder {
+  font-size: 48rpx;
+}
+
+.implantInfo {
+  flex: 1;
+}
+
+.implantName {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.implantDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-sm;
+}
+
+.implantRisk {
+  display: inline-flex;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+}
+
+.riskHigh {
+  background: rgba($color-risk-high, 0.1);
+}
+
+.riskMedium {
+  background: rgba($color-risk-medium, 0.1);
+}
+
+.riskLow {
+  background: rgba($color-risk-low, 0.1);
+}
+
+.implantRiskText {
+  font-size: $font-size-xs;
+  white-space: nowrap;
+
+  .riskHigh & {
+    color: $color-risk-high;
+  }
+
+  .riskMedium & {
+    color: $color-risk-medium;
+  }
+
+  .riskLow & {
+    color: $color-risk-low;
+  }
+}
+
+.identifyNote {
+  padding: $spacing-md;
+  background: #FFF8E6;
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-warning;
+}
+
+.identifyNoteText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}

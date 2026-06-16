@@ -1,0 +1,389 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: 0 $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.elderMode {
+  font-size: $font-size-lg;
+}
+
+.header {
+  padding: $spacing-xl 0 $spacing-lg;
+  background: linear-gradient(180deg, rgba($color-primary, 0.08) 0%, transparent 100%);
+  margin: 0 (-$page-padding);
+  padding-left: $page-padding;
+  padding-right: $page-padding;
+}
+
+.headerTitle {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.checkInCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card-hover;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.checkInHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.checkInIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-sm;
+}
+
+.checkInTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.checkInDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: $spacing-md;
+}
+
+.codeDisplay {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  text-align: center;
+  margin-bottom: $spacing-md;
+}
+
+.codeValue {
+  display: block;
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  letter-spacing: 8rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.codeTip {
+  display: block;
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.checkInArrow {
+  display: block;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.locationCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.locationTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.locationValue {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.locationTip {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.remindSection {
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.sectionSubtitle {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-md;
+}
+
+.remindGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.remindItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  border-left: 4rpx solid $color-warning;
+}
+
+.remindIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.remindInfo {
+  flex: 1;
+}
+
+.remindTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.remindDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.processSection {
+  margin-bottom: $spacing-md;
+}
+
+.processList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.processItem {
+  display: flex;
+  align-items: flex-start;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+}
+
+.processStep {
+  width: 48rpx;
+  height: 48rpx;
+  @include flex-center;
+  background: rgba($color-primary, 0.1);
+  border-radius: $radius-round;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.processStepNum {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.processContent {
+  flex: 1;
+}
+
+.processRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.processTime {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  margin-right: $spacing-sm;
+}
+
+.processTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.processDesc {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.feedbackSection {
+  margin-bottom: $spacing-md;
+}
+
+.feedbackList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.feedbackCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.feedbackQuestion {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.ratingRow {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.ratingStar {
+  width: 56rpx;
+  height: 56rpx;
+  @include flex-center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.ratingStarText {
+  font-size: 40rpx;
+  color: $color-border;
+}
+
+.ratingStarActive {
+  .ratingStarText {
+    color: $color-warning;
+  }
+}
+
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.choiceItem {
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.choiceActive {
+  background: rgba($color-primary, 0.1);
+  border-color: $color-primary;
+}
+
+.choiceLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+
+  .choiceActive & {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.feedbackDone {
+  padding: $spacing-xl;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.feedbackDoneIcon {
+  font-size: 56rpx;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.feedbackDoneText {
+  display: block;
+  font-size: $font-size-lg;
+  color: $color-success;
+  font-weight: $font-weight-semibold;
+}
+
+.btnPrimary {
+  height: $button-height-lg;
+  @include flex-center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnDisabled {
+  opacity: 0.5;
+}
+
+.btnPrimaryText {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.bottomSpace {
+  height: 100rpx;
+}

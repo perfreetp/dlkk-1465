@@ -1,0 +1,68 @@
+@use '@/styles/variables.scss' as *;
+
+.elderToggle {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+.toggleItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  background: $color-bg-page;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.toggleActive {
+  background: rgba($color-primary, 0.1);
+}
+
+.toggleIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-xs;
+}
+
+.toggleLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.toggleSwitch {
+  width: 56rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  background: $color-border;
+  position: relative;
+  transition: all $transition-base;
+}
+
+.switchOn {
+  background: $color-primary;
+}
+
+.toggleDot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: $radius-round;
+  background: $color-text-white;
+  position: absolute;
+  top: 4rpx;
+  left: 4rpx;
+  transition: all $transition-base;
+
+  .switchOn & {
+    left: 28rpx;
+  }
+}
